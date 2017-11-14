@@ -241,19 +241,16 @@ Private ReticleSizeHalf As Double
 Private TgtLmin As Double
 Private TgtLmax As Double
 
-
-
-
 Private bi As BITMAPINFO
 Private HitTriangle(0 To 2) As POINT
-Private PixelOffset As Double
+
 
 
 
 
 
 ''''''''''''''''''''''
-' y property
+' HitLabL property
 ''''''''''''''''''''''
 Public Property Get HitLabL() As Double
     HitLabL = pHitLabL
@@ -354,7 +351,7 @@ Public Property Let ReticleSize(Value As Double)
 End Property
 
 ''''''''''''''''''''''
-' LabL property
+' TgtLabL property
 ''''''''''''''''''''''
 Public Property Get TgtLabL() As Double
     TgtLabL = pTgtLabL
@@ -366,7 +363,7 @@ Public Property Let TgtLabL(Value As Double)
     RedrawControl
 End Property
 ''''''''''''''''''''''
-' LabA property
+' TgtLabA property
 ''''''''''''''''''''''
 Public Property Get TgtLabA() As Double
     TgtLabA = pTgtLabA
@@ -378,7 +375,7 @@ Public Property Let TgtLabA(Value As Double)
     RedrawControl
 End Property
 ''''''''''''''''''''''
-' LabB property
+' TgtLabB property
 ''''''''''''''''''''''
 Public Property Get TgtLabB() As Double
     TgtLabB = pTgtLabB
@@ -493,7 +490,6 @@ Dim result As Long
     LightPen = CreatePen(PS_Solid, pLineWidth, RGB(255, 255, 255))
 
     
-    
     'Create the background for the control
     CalculateLabSpace
     Draw_Background
@@ -523,6 +519,7 @@ Public Sub RedrawControl()
     Dim result As Long
     Dim i As Integer
     'Point the Device Context at a copy of the original background picture
+
     hOldBmp = SelectObject(hDcDrawing, bmDrawingSurface)
    
     result = BitBlt(hDcDrawing, 0, 0, pxWidth, pxHeight, hDcBackground, 0, 0, SRCCOPY)
@@ -586,7 +583,6 @@ Dim yPixPrPt As Double
     LocalRect.btmRight.y = pxHeight
     
     
-    'Set radius equal to min(CenterPixelX,CenterPixelY)
     pReticleSize = 20
     ReticleSizeHalf = 10
                     
@@ -618,8 +614,7 @@ Dim i As Integer
     Dim c As Long
                     
 
-    'result = FillRect(hDcBackground, LocalRect, BackgroundBrush)
-    
+   
     
     'Draw the gradient background
     Dim BytesPrScanline As Long
@@ -636,17 +631,17 @@ Dim i As Integer
     result = GetDIBits(hDcLabSurface, bmLabSurface, 0, bi.bmiHeader.biHeight, backgroundGradient, bi, DIB_RGB_COLORS)
     
     Dim yFract As Double
-    Dim tgtLabRange As Double
+    Dim tgtLabLRange As Double
     Dim LabL As Double
     Dim sR As Double
     Dim sG As Double
     Dim sB As Double
     
    
-    tgtLabRange = TgtLmax - TgtLmin
+    tgtLabLRange = TgtLmax - TgtLmin
     For r = 0 To 99
         yFract = r / 99
-        LabL = TgtLabL + pLabExaggeration * (TgtLmin + yFract * tgtLabRange - TgtLabL)
+        LabL = TgtLabL + pLabExaggeration * (TgtLmin + yFract * tgtLabLRange - TgtLabL)
 
         LAB2sRGB LabL, pTgtLabA, pTgtLabB, sR, sG, sB
         RGBtuple(0) = sB 'Blue
@@ -694,21 +689,19 @@ Dim i As Integer
     'Draw the target
 
     result = Ellipse(hDcBackground, CenterPixelX - ReticleSizeHalf, _
-                                    tgtPixelY - ReticleSizeHalf + PixelOffset, _
+                                    tgtPixelY - ReticleSizeHalf, _
                                     CenterPixelX + ReticleSizeHalf, _
-                                    tgtPixelY + ReticleSizeHalf + PixelOffset)
+                                    tgtPixelY + ReticleSizeHalf)
         'Target V line
-    MoveToEx hDcBackground, CenterPixelX, tgtPixelY - 2 * ReticleSizeHalf + PixelOffset, 0
-    LineTo hDcBackground, CenterPixelX, tgtPixelY + 2 * ReticleSizeHalf + PixelOffset
+    MoveToEx hDcBackground, CenterPixelX, tgtPixelY - 2 * ReticleSizeHalf, 0
+    LineTo hDcBackground, CenterPixelX, tgtPixelY + 2 * ReticleSizeHalf
     
         'Target H line
-    MoveToEx hDcBackground, CenterPixelX - 2 * ReticleSizeHalf, tgtPixelY + PixelOffset, 0
-    LineTo hDcBackground, CenterPixelX + 2 * ReticleSizeHalf, tgtPixelY + PixelOffset
+    MoveToEx hDcBackground, CenterPixelX - 2 * ReticleSizeHalf, tgtPixelY, 0
+    LineTo hDcBackground, CenterPixelX + 2 * ReticleSizeHalf, tgtPixelY
     
     
     'Draw vBar with Divisions
-'    Dim SpokeAngleRad As Double
-'
     MoveToEx hDcBackground, pPadding, pPadding, 0
     LineTo hDcBackground, pPadding, pxHeight - pPadding
     
@@ -859,4 +852,3 @@ Private Function Max(ParamArray values() As Variant) As Variant
    Next
    Max = maxValue
 End Function
-
