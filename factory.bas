@@ -14,7 +14,9 @@ Public Function Create_LabScope(ByRef Parent As Object, _
                                 Optional TgtLabL = 60#, _
                                 Optional TgtLabA = 0#, _
                                 Optional TgtLabB = 0#, _
-                                Optional LabExaggeration = 5#) As cLabScope
+                                Optional LabExaggeration = 5#, _
+                                Optional ScrollBeyondLimit = True) As cLabScope
+                                
     
     Set Create_LabScope = New cLabScope
     Create_LabScope.InitiateProperties Parent:=Parent, _
@@ -31,7 +33,8 @@ Public Function Create_LabScope(ByRef Parent As Object, _
                                        TgtLabL:=TgtLabL, _
                                        TgtLabA:=TgtLabA, _
                                        TgtLabB:=TgtLabB, _
-                                       LabExaggeration:=LabExaggeration
+                                       LabExaggeration:=LabExaggeration, _
+                                       ScrollBeyondLimit:=ScrollBeyondLimit
                                     
 End Function
 
@@ -48,7 +51,8 @@ Public Function Create_LScope(ByRef Parent As Object, _
                              Optional TgtLabL = 60#, _
                              Optional TgtLabA = 0#, _
                              Optional TgtLabB = 0#, _
-                             Optional LabExaggeration = 2#) As cLScope
+                             Optional LabExaggeration = 2#, _
+                             Optional ScrollBeyondLimit = True) As cLScope
     
     Set Create_LScope = New cLScope
     Create_LScope.InitiateProperties Parent:=Parent, _
@@ -63,7 +67,8 @@ Public Function Create_LScope(ByRef Parent As Object, _
                                     TgtLabL:=TgtLabL, _
                                     TgtLabA:=TgtLabA, _
                                     TgtLabB:=TgtLabB, _
-                                    LabExaggeration:=LabExaggeration
+                                    LabExaggeration:=LabExaggeration, _
+                                    ScrollBeyondLimit:=ScrollBeyondLimit
                                     
 End Function
 

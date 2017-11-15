@@ -206,6 +206,7 @@ Private pTgtLabL As Double
 Private pTgtLabA As Double
 Private pTgtLabB As Double
 Private pLabExaggeration As Double
+Private pScrollBeyondLimit As Boolean
 ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
 Private hDcDisplaySurface As LongPtr
@@ -213,8 +214,8 @@ Private hDcDrawing As LongPtr
 Private hDcBackground As LongPtr
 Private hDcLabSurface As LongPtr
 
-Private hDcLabSurfaceOrigBMP As LongPtr
-Private hDcBackgroundOrigBMP As LongPtr
+Private bmpLabSurfaceOrig As LongPtr
+Private bmpBackgroundOrig As LongPtr
 
 
 Private BackgroundBrush As LongPtr
@@ -224,12 +225,11 @@ Private LightPen As LongPtr
 
 
 
-Private hBmpDisplaySurface As LongPtr
-Private hOldBmp As LongPtr
+Private bmpDrawingOrig As LongPtr
 Private hHeap As LongPtr
-Private bmLabSurface As LongPtr
-Private bmBackground As LongPtr
-Private bmDrawingSurface As LongPtr
+Private bmpLabSurface As LongPtr
+Private bmpBackground As LongPtr
+Private bmpDrawing As LongPtr
 Private hWndForm As LongPtr
 Private GlobalRect As RECT
 Private LocalRect As RECT
@@ -440,6 +440,19 @@ Public Property Let UnitsPrDivision(Value As Double)
     RedrawControl
 End Property
 
+''''''''''''''''''''''
+' ScrollBeyondLimit property
+''''''''''''''''''''''
+Public Property Get ScrollBeyondLimit() As Double
+    ScrollBeyondLimit = pScrollBeyondLimit
+End Property
+Public Property Let ScrollBeyondLimit(Value As Double)
+    pScrollBeyondLimit = Value
+    CalculateLabSpace
+    Draw_Background
+    RedrawControl
+End Property
+
 
 
 Public Sub InitiateProperties(ByRef Parent As Object, _
@@ -456,7 +469,8 @@ Public Sub InitiateProperties(ByRef Parent As Object, _
                               Optional TgtLabL = 60#, _
                               Optional TgtLabA = 0#, _
                               Optional TgtLabB = 0#, _
-                              Optional LabExaggeration = 5#)
+                              Optional LabExaggeration = 5#, _
+                              Optional ScrollBeyondLimit = True)
 Dim bufferSize As Long
 Dim result As Long
     hHeap = HeapCreate(0, 0, 0)  ' Create a heap memory object to be used for allocating memory to usercontrol images (Max size 2^23 = 8Mb)
@@ -479,7 +493,7 @@ Dim result As Long
     pTgtLabA = TgtLabA
     pTgtLabB = TgtLabB
     pLabExaggeration = LabExaggeration
-
+    pScrollBeyondLimit = ScrollBeyondLimit
 
     'Convert system colors to RGB values
     If (pBackColor And &H80000000) = &H80000000 Then pBackColor = GetSysColor(pBackColor And &HFFFFFFF)      'Convert system color to RGB
@@ -489,23 +503,20 @@ Dim result As Long
 
     
     'Create a Device Context to draw on and allocate memory for background image
-    hDcLabSurface = CreateCompatibleDC(0)
-    hDcBackground = CreateCompatibleDC(0)         ' Create DeviceContext that matches the screen that image1 is shown on
-    hDcDrawing = CreateCompatibleDC(0)            ' Create DeviceContext that matches the screen that image1 is shown on
     Find_Window_handle
     hDcDisplaySurface = GetDC(hWndForm)
+    hDcDrawing = CreateCompatibleDC(0)            ' Create DeviceContext that matches the screen that image1 is shown on
+    hDcBackground = CreateCompatibleDC(0)         ' Create DeviceContext that matches the screen that image1 is shown on
+    hDcLabSurface = CreateCompatibleDC(0)
     
     SetBkMode hDcBackground, BkMode.TRANSPARENT
     
     DefineDimensions 'Set the controls dimensions. Requires hDcDrawing to be initialised
     
-    
-    bmBackground = CreateCompatibleBitmap(hDcDisplaySurface, pxWidth, pxHeight) 'This line creates a blank bitmap for background compatible with pDisplaySurface
-    bmLabSurface = CreateCompatibleBitmap(hDcDisplaySurface, 100, 100) 'This line creates a blank bitmap for background compatible with pDisplaySurface
-    bmDrawingSurface = CreateCompatibleBitmap(hDcDisplaySurface, pxWidth, pxHeight)  'This line creates a blank bitmap for doublebuffered drawing compatible with pDisplaySurface
-    Set pDisplaySurface.Picture = HandleToPicture(bmDrawingSurface, PICTYPE_BITMAP)
-    
-    hDcBackgroundOrigBMP = SelectObject(hDcBackground, bmBackground)
+    bmpDrawing = CreateCompatibleBitmap(hDcDisplaySurface, pxWidth, pxHeight)  'This line creates a blank bitmap for doublebuffered drawing compatible with pDisplaySurface
+    bmpBackground = CreateCompatibleBitmap(hDcDisplaySurface, pxWidth, pxHeight) 'This line creates a blank bitmap for background compatible with pDisplaySurface
+    bmpLabSurface = CreateCompatibleBitmap(hDcDisplaySurface, 100, 100) 'This line creates a blank bitmap for background compatible with pDisplaySurface
+    Set pDisplaySurface.Picture = HandleToPicture(bmpDrawing, PICTYPE_BITMAP)
     
     
     BackgroundBrush = CreateSolidBrush(pBackColor)
@@ -524,18 +535,22 @@ End Sub
 
 Private Sub Class_Terminate()
     'Clean up
-    HeapDestroy (hHeap)                  ' Heap memory object
+    HeapDestroy hHeap                  ' Heap memory object
     
-    DeleteObject (BackgroundBrush)
-    DeleteObject (ReticleBrush)
-    DeleteObject (ForegroundPen)
+    DeleteObject BackgroundBrush
+    DeleteObject ReticleBrush
+    DeleteObject ForegroundPen
+    DeleteObject LightPen
+    
+    DeleteObject bmpDrawing
+    DeleteObject bmpBackground
+    DeleteObject bmpLabSurface
 
-    DeleteDC (hDcBackground)                       ' Gdi32 Device Context created earlier
-    DeleteDC (hDcDrawing)                          ' Gdi32 Device Context created earlier
     ReleaseDC hWndForm, hDcDisplaySurface
+    DeleteDC hDcDrawing
+    DeleteDC hDcBackground                       ' Gdi32 Device Context created earlier
+    DeleteDC hDcLabSurface                       ' Gdi32 Device Context created earlier
 End Sub
-
-
 
 
 
@@ -544,24 +559,25 @@ Public Sub RedrawControl()
     Dim i As Integer
     'Point the Device Context at a copy of the original background picture
     
-    hOldBmp = SelectObject(hDcDrawing, bmDrawingSurface)
+    bmpDrawingOrig = SelectObject(hDcDrawing, bmpDrawing)
+    bmpBackgroundOrig = SelectObject(hDcBackground, bmpBackground)
     
     result = BitBlt(hDcDrawing, 0, 0, pxWidth, pxHeight, hDcBackground, 0, 0, SRCCOPY)
 
     
     'Redraw the control
-    Dim oldbrush As LongPtr
+    Dim BrushDrawingOrig As LongPtr
     Dim hitPixelX As Long
     Dim hitPixelY As Long
     hitPixelX = r2r(TgtAmin, TgtAmax, pHitLabA, pPadding, pxWidth - pPadding)
     hitPixelY = r2r(TgtBmin, TgtBmax, pHitLabB, pxHeight - pPadding, pPadding)
     
-    oldbrush = SelectObject(hDcDrawing, ReticleBrush)
+    BrushDrawingOrig = SelectObject(hDcDrawing, ReticleBrush)
     result = Ellipse(hDcDrawing, hitPixelX - ReticleSizeHalf, _
                                  hitPixelY - ReticleSizeHalf, _
                                  hitPixelX + ReticleSizeHalf, _
                                  hitPixelY + ReticleSizeHalf)
-    SelectObject hDcDrawing, oldbrush
+    SelectObject hDcDrawing, BrushDrawingOrig
     
     
     
@@ -584,7 +600,8 @@ Public Sub RedrawControl()
     
     result = BitBlt(hDcDisplaySurface, GlobalRect.topleft.x, GlobalRect.topleft.y, pxWidth, pxHeight, hDcDrawing, 0, 0, SRCCOPY)
     
-    SelectObject hDcDrawing, hOldBmp
+    SelectObject hDcDrawing, bmpDrawingOrig
+    SelectObject hDcBackground, bmpBackgroundOrig
 End Sub
 
 
@@ -635,7 +652,6 @@ Dim strLength As Long
     
     s = Mem_ReadString(pS, strLength)
     
-    Debug.Print hWndForm & " - " & s
     HeapFree hHeap, 0, pS
 End Sub
 
@@ -643,14 +659,12 @@ End Sub
 Private Sub Draw_Background()
 Dim result As Long
 Dim i As Integer
-    Dim oldbrush As LongPtr
-    Dim hOldPen As LongPtr
+    Dim BrushBackgroundOrig As LongPtr
+    Dim PenBackgroundOrig As LongPtr
     Dim backgroundGradient As LongPtr
     Dim r As Long
     Dim c As Long
    
-
-    result = FillRect(hDcBackground, LocalRect, BackgroundBrush)
    
     
     
@@ -660,13 +674,12 @@ Dim i As Integer
     bi.bmiHeader.biSize = Len(bi.bmiHeader)
 
     
-    SelectObject hDcBackground, hDcBackgroundOrigBMP
-    result = GetDIBits(hDcLabSurface, bmLabSurface, 0, 0, 0, bi, DIB_RGB_COLORS)
+    result = GetDIBits(hDcLabSurface, bmpLabSurface, 0, 0, 0, bi, DIB_RGB_COLORS)
     BytesPrScanline = Ceiling(bi.bmiHeader.biWidth * bi.bmiHeader.biBitCount / 8, 8) 'Number of Double Words to each line.
 
     backgroundGradient = HeapAlloc(hHeap, 0, BytesPrScanline * bi.bmiHeader.biHeight)
     
-    result = GetDIBits(hDcLabSurface, bmLabSurface, 0, bi.bmiHeader.biHeight, backgroundGradient, bi, DIB_RGB_COLORS)
+    result = GetDIBits(hDcLabSurface, bmpLabSurface, 0, bi.bmiHeader.biHeight, backgroundGradient, bi, DIB_RGB_COLORS)
     
     Dim xFract As Double
     Dim yFract As Double
@@ -701,12 +714,13 @@ Dim i As Integer
 
 
    
-    result = SetDIBits(hDcLabSurface, bmLabSurface, 0, bi.bmiHeader.biHeight, backgroundGradient, bi, DIB_RGB_COLORS)
+    result = SetDIBits(hDcLabSurface, bmpLabSurface, 0, bi.bmiHeader.biHeight, backgroundGradient, bi, DIB_RGB_COLORS)
     
     
-    hDcLabSurfaceOrigBMP = SelectObject(hDcLabSurface, bmLabSurface)
-    SelectObject hDcBackground, bmBackground
+    bmpBackgroundOrig = SelectObject(hDcBackground, bmpBackground)
+    bmpLabSurfaceOrig = SelectObject(hDcLabSurface, bmpLabSurface)
     
+    result = FillRect(hDcBackground, LocalRect, BackgroundBrush)
     result = StretchBlt(hDcBackground, 0, 0, pxSize, pxSize, hDcLabSurface, 0, 0, 100, 100, SRCCOPY)
 
     HeapFree hHeap, 0, backgroundGradient
@@ -714,10 +728,10 @@ Dim i As Integer
 
 
     If pTgtLabL >= 30 Then
-        hOldPen = SelectObject(hDcBackground, ForegroundPen)
+        PenBackgroundOrig = SelectObject(hDcBackground, ForegroundPen)
         result = SetTextColor(hDcBackground, pForeColor)
     Else
-        hOldPen = SelectObject(hDcBackground, LightPen)
+        PenBackgroundOrig = SelectObject(hDcBackground, LightPen)
         result = SetTextColor(hDcBackground, &HFFFFFF)
     End If
     
@@ -731,7 +745,7 @@ Dim i As Integer
     'Draw the Rings
     Dim TransparentBrush As LongPtr
     TransparentBrush = GetStockObject(NULL_BRUSH And &HFFFFFFF)
-    oldbrush = SelectObject(hDcBackground, TransparentBrush)
+    BrushBackgroundOrig = SelectObject(hDcBackground, TransparentBrush)
     
     Dim tgtPixelX As Long
     Dim tgtPixelY As Long
@@ -790,8 +804,11 @@ Dim i As Integer
         Rectangle hDcBackground, 0, 0, pxWidth, pxHeight
     End If
     
-    SelectObject hDcBackground, oldbrush
-    SelectObject hDcBackground, hOldPen
+    SelectObject hDcBackground, bmpBackgroundOrig
+    SelectObject hDcLabSurface, bmpLabSurfaceOrig
+    
+    SelectObject hDcBackground, BrushBackgroundOrig
+    SelectObject hDcBackground, PenBackgroundOrig
 
 End Sub
 
@@ -803,11 +820,11 @@ Sub CalculateLabSpace()
     tgtBrange = pRings * pUnitsPrDivision * 2
     
     'A Component
-    If (pTgtLabA - tgtArange / 2) < -128 Then
+    If (Not pScrollBeyondLimit) And ((pTgtLabA - tgtArange / 2) < -128) Then
         'Offset due to target beeing close to lower end
         TgtAmin = -128
     
-    ElseIf (pTgtLabA + tgtArange / 2) > 127 Then
+    ElseIf (Not pScrollBeyondLimit) And ((pTgtLabA + tgtArange / 2) > 127) Then
         'Offset due to target beeing close to upper end
         TgtAmin = 127 - tgtArange
 
@@ -818,11 +835,11 @@ Sub CalculateLabSpace()
     
 
     'B Component
-    If (pTgtLabB - tgtBrange / 2) < -128 Then
+    If (Not pScrollBeyondLimit) And ((pTgtLabB - tgtBrange / 2) < -128) Then
         'Offset due to target beeing close to lower end
         TgtBmin = -128
     
-    ElseIf (pTgtLabB + tgtBrange / 2) > 127 Then
+    ElseIf (Not pScrollBeyondLimit) And ((pTgtLabB + tgtBrange / 2) > 127) Then
         'Offset due to target beeing close to upper end
         TgtBmin = 127 - tgtBrange
 
