@@ -2,20 +2,20 @@ Attribute VB_Name = "factory"
 
 Public Function Create_LabScope(ByRef Parent As Object, _
                                 ByRef DisplaySurface As MSForms.Image, _
-                                Optional HitLabA = 0#, _
-                                Optional HitLabB = 0#, _
-                                Optional BackColor = &H8000000F, _
-                                Optional ForeColor = &H80000012, _
-                                Optional ReticleColor = &HFF7F00, _
-                                Optional Spokes = 4, _
-                                Optional Rings = 3, _
-                                Optional Padding = 0, _
-                                Optional UnitsPrDivision = 5#, _
-                                Optional TgtLabL = 60#, _
-                                Optional TgtLabA = 0#, _
-                                Optional TgtLabB = 0#, _
-                                Optional LabExaggeration = 5#, _
-                                Optional ScrollBeyondLimit = True) As cLabScope
+                                Optional HitLabA As Double = 0#, _
+                                Optional HitLabB As Double = 0#, _
+                                Optional BackColor As Long = &H8000000F, _
+                                Optional ForeColor As Long = &H80000012, _
+                                Optional ReticleColor As Long = &HFF7F00, _
+                                Optional Spokes As Long = 4&, _
+                                Optional Rings As Long = 3&, _
+                                Optional Padding As Long = 0&, _
+                                Optional UnitsPrDivision As Double = 5#, _
+                                Optional TgtLabL As Double = 60#, _
+                                Optional TgtLabA As Double = 0#, _
+                                Optional TgtLabB As Double = 0#, _
+                                Optional LabExaggeration As Double = 5#, _
+                                Optional ScrollBeyondLimit As Boolean = True) As cLabScope
                                 
     
     Set Create_LabScope = New cLabScope
@@ -41,24 +41,22 @@ End Function
 
 Public Function Create_LScope(ByRef Parent As Object, _
                              ByRef DisplaySurface As MSForms.Image, _
-                             Optional HitLabL = 60#, _
-                             Optional BackColor = &H8000000F, _
-                             Optional ForeColor = &H80000012, _
-                             Optional ReticleColor = &HFF7F00, _
-                             Optional Padding = 5, _
-                             Optional Divisions = 6, _
-                             Optional UnitsPrDivision = 5#, _
-                             Optional TgtLabL = 60#, _
-                             Optional TgtLabA = 0#, _
-                             Optional TgtLabB = 0#, _
-                             Optional LabExaggeration = 2#, _
-                             Optional ScrollBeyondLimit = True) As cLScope
+                             Optional HitLabL As Double = 60#, _
+                             Optional ForeColor As Long = &H80000012, _
+                             Optional ReticleColor As Long = &HFF7F00, _
+                             Optional Padding As Long = 5&, _
+                             Optional Divisions As Long = 6&, _
+                             Optional UnitsPrDivision As Double = 5#, _
+                             Optional TgtLabL As Double = 60#, _
+                             Optional TgtLabA As Double = 0#, _
+                             Optional TgtLabB As Double = 0#, _
+                             Optional LabExaggeration As Double = 2#, _
+                             Optional ScrollBeyondLimit As Boolean = True) As cLScope
     
     Set Create_LScope = New cLScope
     Create_LScope.InitiateProperties Parent:=Parent, _
                                     DisplaySurface:=DisplaySurface, _
                                     HitLabL:=HitLabL, _
-                                    BackColor:=BackColor, _
                                     ForeColor:=ForeColor, _
                                     ReticleColor:=ReticleColor, _
                                     Padding:=Padding, _
@@ -72,4 +70,29 @@ Public Function Create_LScope(ByRef Parent As Object, _
                                     
 End Function
 
-
+Public Function Create_ColorTile(ByRef Parent As Object, _
+                                 ByRef DisplaySurface As MSForms.Image, _
+                                 Optional LabScope As cLabScope = Nothing, _
+                                 Optional LScope As cLScope = Nothing, _
+                                 Optional TgtLabL As Double = 60#, _
+                                 Optional TgtLabA As Double = 0#, _
+                                 Optional TgtLabB As Double = 0#, _
+                                 Optional HitLabL As Double = 50#, _
+                                 Optional HitLabA As Double = 0#, _
+                                 Optional HitLabB As Double = 0#, _
+                                 Optional Frame As Boolean = False, _
+                                 Optional FrameThickness As Long = 1&) As cColorTile
+    Set Create_ColorTile = New cColorTile
+    Create_ColorTile.InitiateProperties Parent:=Parent, _
+                                        DisplaySurface:=DisplaySurface, _
+                                        LabScope:=LabScope, _
+                                        LScope:=LScope, _
+                                        TgtLabL:=TgtLabL, _
+                                        TgtLabA:=TgtLabA, _
+                                        TgtLabB:=TgtLabB, _
+                                        HitLabL:=HitLabL, _
+                                        HitLabA:=HitLabA, _
+                                        HitLabB:=HitLabB, _
+                                        Frame:=Frame, _
+                                        FrameThickness:=FrameThickness
+End Function

@@ -11,36 +11,31 @@ Option Explicit
 
 
 'Graphic methods
-Private Declare PtrSafe Function CreateCompatibleDC Lib "gdi32" (ByVal hdc As LongPtr) As LongPtr
+Private Declare PtrSafe Function CreateCompatibleDC Lib "gdi32" (ByVal hDC As LongPtr) As LongPtr
 Private Declare PtrSafe Function GetDC Lib "user32" (ByVal hWnd As LongPtr) As LongPtr
-Private Declare PtrSafe Function ReleaseDC Lib "user32" (ByVal hWnd As LongPtr, ByVal hdc As LongPtr) As LongPtr
-Private Declare PtrSafe Function SelectObject Lib "gdi32" (ByVal hdc As LongPtr, ByVal hObject As LongPtr) As Long
-Private Declare PtrSafe Function MoveToEx Lib "gdi32" (ByVal hdc As LongPtr, ByVal x As Long, ByVal y As Long, ByVal lpPoint As LongPtr) As Boolean
-Private Declare PtrSafe Function LineTo Lib "gdi32" (ByVal hdc As LongPtr, ByVal x As Long, ByVal y As Long) As Boolean
-Private Declare PtrSafe Function DeleteDC Lib "gdi32" (ByVal hdc As LongPtr) As Long
-Private Declare PtrSafe Function GetDIBits Lib "gdi32" (ByVal hdc As LongPtr, ByVal hbmp As LongPtr, ByVal uStartScan As Long, ByVal cScanLines As Long, ByVal lpvBits As LongPtr, ByRef lpbi As Any, ByVal uUsage As Long) As Long
-Private Declare PtrSafe Function SetDIBits Lib "gdi32" (ByVal hdc As LongPtr, ByVal hbmp As LongPtr, ByVal uStartScan As Long, ByVal cScanLines As Long, ByVal lpvBits As LongPtr, ByRef lpbmi As Any, ByVal fuColorUse As Long) As Long
-Private Declare PtrSafe Function GetActiveWindow Lib "user32" () As LongPtr
-Private Declare PtrSafe Function InvalidateRect Lib "user32" (ByVal hWnd As LongPtr, ByRef lpRect As Any, bErase As Boolean) As Boolean
-Private Declare PtrSafe Function GetDeviceCaps Lib "gdi32" (ByVal hdc As LongPtr, ByVal nIndex As Long) As Long
+Private Declare PtrSafe Function ReleaseDC Lib "user32" (ByVal hWnd As LongPtr, ByVal hDC As LongPtr) As LongPtr
+Private Declare PtrSafe Function SelectObject Lib "gdi32" (ByVal hDC As LongPtr, ByVal hObject As LongPtr) As Long
+Private Declare PtrSafe Function MoveToEx Lib "gdi32" (ByVal hDC As LongPtr, ByVal X As Long, ByVal Y As Long, ByVal lpPoint As LongPtr) As Boolean
+Private Declare PtrSafe Function LineTo Lib "gdi32" (ByVal hDC As LongPtr, ByVal X As Long, ByVal Y As Long) As Boolean
+Private Declare PtrSafe Function DeleteDC Lib "gdi32" (ByVal hDC As LongPtr) As Long
+Private Declare PtrSafe Function GetDIBits Lib "gdi32" (ByVal hDC As LongPtr, ByVal hbmp As LongPtr, ByVal uStartScan As Long, ByVal cScanLines As Long, ByVal lpvBits As LongPtr, ByRef lpbi As Any, ByVal uUsage As Long) As Long
+Private Declare PtrSafe Function SetDIBits Lib "gdi32" (ByVal hDC As LongPtr, ByVal hbmp As LongPtr, ByVal uStartScan As Long, ByVal cScanLines As Long, ByVal lpvBits As LongPtr, ByRef lpbmi As Any, ByVal fuColorUse As Long) As Long
+Private Declare PtrSafe Function GetDeviceCaps Lib "gdi32" (ByVal hDC As LongPtr, ByVal nIndex As Long) As Long
 Private Declare PtrSafe Function BitBlt Lib "gdi32" (ByVal hdcDest As LongPtr, ByVal nXDest As Long, ByVal nYDest As Long, ByVal nWidth As Long, ByVal nHeight As Long, ByVal hdcSrc As LongPtr, ByVal nXSrc As Long, ByVal nYSrc As Long, ByVal dwRop As Long) As Boolean
 Private Declare PtrSafe Function StretchBlt Lib "gdi32" (ByVal hdcDest As LongPtr, ByVal nXOriginDest As Long, ByVal nYOriginDest As Long, ByVal nWidthDest As Long, ByVal nHeightDest As Long, ByVal hdcSrc As LongPtr, ByVal nXOriginSrc As Long, ByVal nYOriginSrc As Long, ByVal nWidthSrc As Long, ByVal nHeightSrc As Long, ByVal dwRop As Long) As Boolean
-Private Declare PtrSafe Function CreateCompatibleBitmap Lib "gdi32" (ByVal hdc As LongPtr, ByVal nWidth As Long, ByVal nHeight As Long) As LongPtr
-Private Declare PtrSafe Function FillRect Lib "user32" (ByVal hdc As LongPtr, ByRef lpRect As Any, ByVal hBrush As LongPtr) As Long
+Private Declare PtrSafe Function CreateCompatibleBitmap Lib "gdi32" (ByVal hDC As LongPtr, ByVal nWidth As Long, ByVal nHeight As Long) As LongPtr
 Private Declare PtrSafe Function CreateSolidBrush Lib "gdi32" (ByVal crColor As Long) As LongPtr
 Private Declare PtrSafe Function DeleteObject Lib "gdi32" (ByVal hObject As LongPtr) As Boolean
-Private Declare PtrSafe Function CopyImage Lib "gdi32" (ByVal hImage As LongPtr, ByVal uType As Long, ByVal cxDesired As Long, ByVal cyDesired As Long, ByVal fuFlags As Long) As LongPtr
 Private Declare PtrSafe Function CreatePen Lib "gdi32" (ByVal fnPenStyle As Long, ByVal nWidth As Long, ByVal crColor As Long) As LongPtr
 Private Declare PtrSafe Function GetSysColor Lib "user32" (ByVal nIndex As Long) As Long
-Private Declare PtrSafe Function Ellipse Lib "gdi32" (ByVal hdc As LongPtr, ByVal nLeftRect As Long, ByVal nTopRect As Long, ByVal nRightRect As Long, ByVal nBottomRect As Long) As Boolean
+Private Declare PtrSafe Function Ellipse Lib "gdi32" (ByVal hDC As LongPtr, ByVal nLeftRect As Long, ByVal nTopRect As Long, ByVal nRightRect As Long, ByVal nBottomRect As Long) As Boolean
 Private Declare PtrSafe Function GetStockObject Lib "gdi32" (ByVal fnObject As Long) As LongPtr
 Private Declare PtrSafe Function OleCreatePictureIndirect Lib "oleaut32.dll" (PicDesc As PICTDESC, RefIID As GUID, ByVal fPictureOwnsHandle As LongPtr, IPic As IPicture) As LongPtr
-Private Declare PtrSafe Function Rectangle Lib "gdi32" (ByVal hdc As LongPtr, ByVal nLeftRect As Long, ByVal nTopRect As Long, ByVal nRightRect As Long, ByVal nBottomRect As Long) As Boolean
-Private Declare PtrSafe Function TabbedTextOut Lib "user32" Alias "TabbedTextOutW" (ByVal hdc As LongPtr, ByVal x As Long, ByVal y As Long, ByVal lpString As String, ByVal nCount As Long, ByVal nTabPositions As Long, ByRef lpnTabStopPositions As Any, ByVal nTabOrigin As Long) As Long
-Private Declare PtrSafe Function SetBkMode Lib "gdi32" (ByVal hdc As LongPtr, ByVal iBkMode As Long) As Long
-Private Declare PtrSafe Function Polygon Lib "gdi32" (ByVal hdc As LongPtr, ByVal lpPoints As LongPtr, ByVal nCount As Long) As Boolean
-Private Declare PtrSafe Function SetDCPenColor Lib "gdi32" (ByVal hdc As LongPtr, ByVal crColor As Long) As Long
-Private Declare PtrSafe Function SetTextColor Lib "gdi32" (ByVal hdc As LongPtr, ByVal crColor As Long) As Long
+Private Declare PtrSafe Function Rectangle Lib "gdi32" (ByVal hDC As LongPtr, ByVal nLeftRect As Long, ByVal nTopRect As Long, ByVal nRightRect As Long, ByVal nBottomRect As Long) As Boolean
+Private Declare PtrSafe Function TabbedTextOut Lib "user32" Alias "TabbedTextOutW" (ByVal hDC As LongPtr, ByVal X As Long, ByVal Y As Long, ByVal lpString As String, ByVal nCount As Long, ByVal nTabPositions As Long, ByRef lpnTabStopPositions As Any, ByVal nTabOrigin As Long) As Long
+Private Declare PtrSafe Function SetBkMode Lib "gdi32" (ByVal hDC As LongPtr, ByVal iBkMode As Long) As Long
+Private Declare PtrSafe Function Polygon Lib "gdi32" (ByVal hDC As LongPtr, ByVal lpPoints As LongPtr, ByVal nCount As Long) As Boolean
+Private Declare PtrSafe Function SetTextColor Lib "gdi32" (ByVal hDC As LongPtr, ByVal crColor As Long) As Long
 
 'Memory management methods
 Private Declare PtrSafe Function HeapCreate Lib "kernel32" (ByVal flOptions As Long, ByVal dwInitialSize As Long, ByVal dwMaximumSize As Long) As LongPtr
@@ -52,148 +47,13 @@ Private Declare PtrSafe Function GetWindowText Lib "user32" Alias "GetWindowText
 Private Declare PtrSafe Function FindWindow Lib "user32" Alias "FindWindowA" (ByVal lpClassName As String, ByVal lpWindowName As String) As LongPtr
 
 
-Private Type PICTDESC     'For use when creating OLE pictureobject
-   cbSizeOfStruct As Long
-   picType As Long
-   hgdiObj As LongPtr
-   hPalOrXYExt As LongPtr
-End Type
 
-Private Type GUID          'For use when creating OLE pictureobject
-   Data1 As Long
-   Data2 As Integer
-   Data3 As Integer
-   Data4(0 To 7)  As Byte
-End Type
-
-    
-Private Type BITMAPINFOHEADER ' 40 bytes
-    biSize As Long
-    biWidth As Long
-    biHeight As Long
-    biPlanes As Integer
-    biBitCount As Integer
-    biCompression As Long
-    biSizeImage As Long
-    biXPelsPerMeter As Long
-    biYPelsPerMeter As Long
-    biClrUsed As Long
-    biClrImportant As Long
-End Type
-Private Type RGBQUAD           '4 bytes
-    rgbBlue As Byte
-    rgbGreen As Byte
-    rgbRed As Byte
-    rgbReserved As Byte
-End Type
-Private Type BITMAPINFO       ' 44 bytes
-    bmiHeader As BITMAPINFOHEADER
-    bmiColors As RGBQUAD
-End Type
-
-Private Type POINT
-    x As Long
-    y As Long
-End Type
-Private Type RECT
-    topleft As POINT
-    btmRight As POINT
-End Type
-    
-    
-Private Enum DIBColors
-   DIB_RGB_COLORS = &H0
-End Enum
-
-Private Enum DeviceCap
-    LOGPIXELSX = 88 ' Logical pixels inch in X
-    LOGPIXELSY = 90 ' Logical pixels inch in Y
-End Enum
-
-Private Enum TernaryRasterOperations
-    SRCCOPY = &HCC0020
-    SRCPAINT = &HEE0086
-    SRCAND = &H8800C6
-    SRCINVERT = &H660046
-    SRCERASE = &H440328
-    NOTSRCCOPY = &H330008
-    NOTSRCERASE = &H1100A6
-    MERGECOPY = &HC000CA
-    MERGEPAINT = &HBB0226
-    PATCOPY = &HF00021
-    PATPAINT = &HFB0A09
-    PATINVERT = &H5A0049
-    DSTINVERT = &H550009
-    BLACKNESS = &H42
-    WHITENESS = &HFF0062
-End Enum
-Private Enum PenStyle
-    PS_COSMETIC = &H0
-    PS_ENDCAP_ROUND = &H0
-    PS_JOIN_ROUND = &H0
-    PS_Solid = &H0
-    PS_DASH = &H1
-    PS_DOT = &H2
-    PS_DASHDOT = &H3
-    PS_DASHDOTDOT = &H4
-    PS_NULL = &H5
-    PS_INSIDEFRAME = &H6
-    PS_USERSTYLE = &H7
-    PS_ALTERNATE = &H8
-    PS_ENDCAP_SQUARE = &H100
-    PS_ENDCAP_FLAT = &H200
-    PS_JOIN_BEVEL = &H1000
-    PS_JOIN_MITER = &H2000
-    PS_GEOMETRIC = &H10000
-End Enum
-
-Private Enum StockObject
-    WHITE_BRUSH = &H0
-    LTGRAY_BRUSH = &H1
-    GRAY_BRUSH = &H2
-    DKGRAY_BRUSH = &H3
-    BLACK_BRUSH = &H4
-    NULL_BRUSH = &H5
-    HOLLOW_BRUSH = &H5
-    WHITE_PEN = &H6
-    BLACK_PEN = &H7
-    NULL_PEN = &H8
-    OEM_FIXED_FONT = &HA
-    ANSI_FIXED_FONT = &HB
-    ANSI_VAR_FONT = &HC
-    SYSTEM_FONT = &HD
-    DEVICE_DEFAULT_FONT = &HE
-    DEFAULT_PALETTE = &HF
-    SYSTEM_FIXED_FONT = &H10
-    DEFAULT_GUI_FONT = &H11
-    DC_BRUSH = &H12
-    DC_PEN = &H13
-End Enum
-
-Private Enum PictureTypeConstants
-    PICTYPE_UNINITIALIZED = -1
-    PICTYPE_NONE = 0
-    PICTYPE_BITMAP = 1
-    PICTYPE_METAFILE = 2
-    PICTYPE_ICON = 3
-    PICTYPE_ENHMETAFILE = 4
-End Enum
- 
-Private Enum BkMode
-    OPAQUE = 0
-    TRANSPARENT = 1
-End Enum
-
-Private Enum LocalErrors
-    errInvalidPropertyValue = 1
-End Enum
 
 Private pParent As Object
 Private pDisplaySurface As MSForms.Image
 ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
 'Property variables
-Private pBackColor As Long
 Private pForeColor As Long
 Private pPadding As Long
 Private pLineWidth As Long
@@ -254,20 +114,6 @@ Public Property Get HitLabL() As Double
 End Property
 Public Property Let HitLabL(Value As Double)
     pHitLabL = Value
-    RedrawControl
-End Property
-
-''''''''''''''''''''''
-' Background color property
-''''''''''''''''''''''
-Public Property Get BackColor() As Double
-    BackColor = pBackColor
-End Property
-Public Property Let BackColor(Value As Double)
-    pBackColor = Value
-    
-    CalculateLabSpace
-    Draw_Background
     RedrawControl
 End Property
 
@@ -431,18 +277,17 @@ End Property
 
 Public Sub InitiateProperties(ByRef Parent As Object, _
                               ByRef DisplaySurface As MSForms.Image, _
-                              Optional HitLabL = 60#, _
-                              Optional BackColor = &H8000000F, _
-                              Optional ForeColor = &H80000012, _
-                              Optional ReticleColor = &HFF7F00, _
-                              Optional Padding = 5, _
-                              Optional Divisions = 6, _
-                              Optional UnitsPrDivision = 5#, _
-                              Optional TgtLabL = 60#, _
-                              Optional TgtLabA = 0#, _
-                              Optional TgtLabB = 0#, _
-                              Optional LabExaggeration = 2#, _
-                              Optional ScrollBeyondLimit = True)
+                              Optional HitLabL As Double = 60#, _
+                              Optional ForeColor As Long = &H80000012, _
+                              Optional ReticleColor As Long = &HFF7F00, _
+                              Optional Padding As Long = 5&, _
+                              Optional Divisions As Long = 6&, _
+                              Optional UnitsPrDivision As Double = 5#, _
+                              Optional TgtLabL As Double = 60#, _
+                              Optional TgtLabA As Double = 0#, _
+                              Optional TgtLabB As Double = 0#, _
+                              Optional LabExaggeration As Double = 2#, _
+                              Optional ScrollBeyondLimit As Boolean = True)
 Dim bufferSize As Long
 Dim result As Long
     hHeap = HeapCreate(0, 0, 0)  ' Create a heap memory object to be used for allocating memory to usercontrol images (Max size 2^23 = 8Mb)
@@ -453,7 +298,6 @@ Dim result As Long
     
     'Set properties
     pHitLabL = HitLabL
-    pBackColor = BackColor
     pForeColor = ForeColor
     pReticleColor = ReticleColor
     pPadding = Padding
@@ -467,7 +311,6 @@ Dim result As Long
 
 
     'Convert system colors to RGB values
-    If (pBackColor And &H80000000) = &H80000000 Then pBackColor = GetSysColor(pBackColor And &HFFFFFFF)      'Convert system color to RGB
     If (pForeColor And &H80000000) = &H80000000 Then pForeColor = GetSysColor(pForeColor And &HFFFFFFF)      'Convert system color to RGB
     If (pReticleColor And &H80000000) = &H80000000 Then pReticleColor = GetSysColor(pReticleColor And &HFFFFFFF)      'Convert system color to RGB
     
@@ -542,12 +385,12 @@ Public Sub RedrawControl()
     hitPixelY = r2r(TgtLmin, TgtLmax, pHitLabL, pxHeight - pPadding, pPadding)
    
     BrushDrawingOrig = SelectObject(hDcDrawing, ReticleBrush)
-    HitTriangle(0).x = CenterPixelX + pReticleSize
-    HitTriangle(0).y = hitPixelY
-    HitTriangle(1).x = CenterPixelX + 0.866025403784439 * pReticleSize + pReticleSize
-    HitTriangle(1).y = hitPixelY - ReticleSizeHalf
-    HitTriangle(2).x = CenterPixelX + 0.866025403784439 * pReticleSize + pReticleSize
-    HitTriangle(2).y = hitPixelY + ReticleSizeHalf
+    HitTriangle(0).X = CenterPixelX + pReticleSize
+    HitTriangle(0).Y = hitPixelY
+    HitTriangle(1).X = CenterPixelX + 0.866025403784439 * pReticleSize + pReticleSize
+    HitTriangle(1).Y = hitPixelY - ReticleSizeHalf
+    HitTriangle(2).X = CenterPixelX + 0.866025403784439 * pReticleSize + pReticleSize
+    HitTriangle(2).Y = hitPixelY + ReticleSizeHalf
     result = Polygon(hDcDrawing, VarPtr(HitTriangle(0)), 3)
     
     SelectObject hDcDrawing, BrushDrawingOrig
@@ -565,7 +408,7 @@ Public Sub RedrawControl()
     sW = StrConv(s, vbUnicode)
     result = TabbedTextOut(hDcDrawing, 0, pxHeight - 20, sW, Len(s), 1, TabStops(1), 0)
     
-    result = BitBlt(hDcDisplaySurface, GlobalRect.topleft.x, GlobalRect.topleft.y, pxWidth, pxHeight, hDcDrawing, 0, 0, SRCCOPY)
+    result = BitBlt(hDcDisplaySurface, GlobalRect.topleft.X, GlobalRect.topleft.Y, pxWidth, pxHeight, hDcDrawing, 0, 0, SRCCOPY)
     
     SelectObject hDcDrawing, bmpDrawingOrig
     SelectObject hDcBackground, bmpBackgroundOrig
@@ -580,25 +423,36 @@ Dim yPixPrPt As Double
     'Set Scope rectangle for use when invalidating paint area
     xPixPrPt = GetDeviceCaps(hDcDrawing, LOGPIXELSX) / 72
     yPixPrPt = GetDeviceCaps(hDcDrawing, LOGPIXELSY) / 72
-    GlobalRect.topleft.x = pDisplaySurface.Left * xPixPrPt
-    GlobalRect.topleft.y = pDisplaySurface.Top * yPixPrPt
-    GlobalRect.btmRight.x = (pDisplaySurface.Left + pDisplaySurface.Width) * xPixPrPt
-    GlobalRect.btmRight.y = (pDisplaySurface.Top + pDisplaySurface.Height) * yPixPrPt
+    GlobalRect.topleft.X = pDisplaySurface.Left * xPixPrPt
+    GlobalRect.topleft.Y = pDisplaySurface.Top * yPixPrPt
+    GlobalRect.btmRight.X = (pDisplaySurface.Left + pDisplaySurface.Width) * xPixPrPt
+    GlobalRect.btmRight.Y = (pDisplaySurface.Top + pDisplaySurface.Height) * yPixPrPt
     
     pxWidth = pDisplaySurface.Width * xPixPrPt
     pxHeight = pDisplaySurface.Height * yPixPrPt
     CenterPixelX = pxWidth / 2
     CenterPixelY = pxHeight / 2
     
-    LocalRect.topleft.x = 0
-    LocalRect.topleft.x = 0
-    LocalRect.btmRight.x = pxWidth
-    LocalRect.btmRight.y = pxHeight
+    LocalRect.topleft.X = 0
+    LocalRect.topleft.Y = 0
+    LocalRect.btmRight.X = pxWidth
+    LocalRect.btmRight.Y = pxHeight
     
     
     pReticleSize = 20
     ReticleSizeHalf = 10
                     
+End Sub
+
+Sub SetColors(TgtLabL As Double, TgtLabA As Double, TgtLabB As Double, HitLabL As Double)
+    pTgtLabL = TgtLabL
+    pTgtLabA = TgtLabA
+    pTgtLabB = TgtLabB
+    pHitLabL = HitLabL
+    
+    CalculateLabSpace
+    Draw_Background
+    RedrawControl
 End Sub
 
 Private Sub Find_Window_handle()
@@ -612,7 +466,6 @@ Dim strLength As Long
     
     s = Mem_ReadString(pS, strLength)
     
-    Debug.Print hWndForm & " - " & s
     HeapFree hHeap, 0, pS
 End Sub
 
@@ -718,18 +571,18 @@ Dim i As Integer
     LineTo hDcBackground, pPadding, pxHeight - pPadding
     
     Dim minTickY As Double
-    Dim y As Double
-    Dim x As Double
-    Dim L As Double
+    Dim Y As Double
+    Dim X As Double
+    Dim l As Double
     
     minTickY = pTgtLabL - pUnitsPrDivision * Int((pTgtLabL - TgtLmin) / pUnitsPrDivision)
     For i = 0 To pDivisions
-        L = i * pUnitsPrDivision + minTickY
-        y = r2r(TgtLmin, TgtLmax, L, pxHeight - pPadding, pPadding)
-        x = r2r(0, pUnitsPrDivision * pDivisions, Abs(pTgtLabL - L), pPadding + 10, pxWidth)
+        l = i * pUnitsPrDivision + minTickY
+        Y = r2r(TgtLmin, TgtLmax, l, pxHeight - pPadding, pPadding)
+        X = r2r(0, pUnitsPrDivision * pDivisions, Abs(pTgtLabL - l), pPadding + 10, pxWidth)
         
-        MoveToEx hDcBackground, pPadding, y, 0
-        LineTo hDcBackground, x, y
+        MoveToEx hDcBackground, pPadding, Y, 0
+        LineTo hDcBackground, X, Y
     Next i
     
     
@@ -844,10 +697,10 @@ Dim oPicture As IPicture
         
 End Function
 
-Private Function Ceiling(ByVal x As Double, Optional ByVal Factor As Double = 1) As Double
+Private Function Ceiling(ByVal X As Double, Optional ByVal Factor As Double = 1) As Double
     ' X is the value you want to round
     ' is the multiple to which you want to round
-    Ceiling = (Int(x / Factor) - (x / Factor - Int(x / Factor) > 0)) * Factor
+    Ceiling = (Int(X / Factor) - (X / Factor - Int(X / Factor) > 0)) * Factor
 End Function
 
 Private Function Min(ParamArray values() As Variant) As Variant
