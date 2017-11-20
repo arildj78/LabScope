@@ -135,5 +135,7 @@ End Enum
 
 Public Enum LocalErrors
     errInvalidPropertyValue = 1
+    errObjectMissing = 2
+    errAlreadyMemberOfGroup = 3
 End Enum
 
