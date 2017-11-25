@@ -15,8 +15,8 @@ Private Declare PtrSafe Function CreateCompatibleDC Lib "gdi32" (ByVal hDC As Lo
 Private Declare PtrSafe Function GetDC Lib "user32" (ByVal hWnd As LongPtr) As LongPtr
 Private Declare PtrSafe Function ReleaseDC Lib "user32" (ByVal hWnd As LongPtr, ByVal hDC As LongPtr) As LongPtr
 Private Declare PtrSafe Function SelectObject Lib "gdi32" (ByVal hDC As LongPtr, ByVal hObject As LongPtr) As Long
-Private Declare PtrSafe Function MoveToEx Lib "gdi32" (ByVal hDC As LongPtr, ByVal X As Long, ByVal Y As Long, ByVal lpPoint As LongPtr) As Boolean
-Private Declare PtrSafe Function LineTo Lib "gdi32" (ByVal hDC As LongPtr, ByVal X As Long, ByVal Y As Long) As Boolean
+Private Declare PtrSafe Function MoveToEx Lib "gdi32" (ByVal hDC As LongPtr, ByVal x As Long, ByVal y As Long, ByVal lpPoint As LongPtr) As Boolean
+Private Declare PtrSafe Function LineTo Lib "gdi32" (ByVal hDC As LongPtr, ByVal x As Long, ByVal y As Long) As Boolean
 Private Declare PtrSafe Function DeleteDC Lib "gdi32" (ByVal hDC As LongPtr) As Long
 Private Declare PtrSafe Function GetDIBits Lib "gdi32" (ByVal hDC As LongPtr, ByVal hbmp As LongPtr, ByVal uStartScan As Long, ByVal cScanLines As Long, ByVal lpvBits As LongPtr, ByRef lpbi As Any, ByVal uUsage As Long) As Long
 Private Declare PtrSafe Function SetDIBits Lib "gdi32" (ByVal hDC As LongPtr, ByVal hbmp As LongPtr, ByVal uStartScan As Long, ByVal cScanLines As Long, ByVal lpvBits As LongPtr, ByRef lpbmi As Any, ByVal fuColorUse As Long) As Long
@@ -33,7 +33,7 @@ Private Declare PtrSafe Function Ellipse Lib "gdi32" (ByVal hDC As LongPtr, ByVa
 Private Declare PtrSafe Function GetStockObject Lib "gdi32" (ByVal fnObject As Long) As LongPtr
 Private Declare PtrSafe Function OleCreatePictureIndirect Lib "oleaut32.dll" (PicDesc As PICTDESC, RefIID As GUID, ByVal fPictureOwnsHandle As LongPtr, IPic As IPicture) As LongPtr
 Private Declare PtrSafe Function Rectangle Lib "gdi32" (ByVal hDC As LongPtr, ByVal nLeftRect As Long, ByVal nTopRect As Long, ByVal nRightRect As Long, ByVal nBottomRect As Long) As Boolean
-Private Declare PtrSafe Function TabbedTextOut Lib "user32" Alias "TabbedTextOutW" (ByVal hDC As LongPtr, ByVal X As Long, ByVal Y As Long, ByVal lpString As String, ByVal nCount As Long, ByVal nTabPositions As Long, ByRef lpnTabStopPositions As Any, ByVal nTabOrigin As Long) As Long
+Private Declare PtrSafe Function TabbedTextOut Lib "user32" Alias "TabbedTextOutW" (ByVal hDC As LongPtr, ByVal x As Long, ByVal y As Long, ByVal lpString As String, ByVal nCount As Long, ByVal nTabPositions As Long, ByRef lpnTabStopPositions As Any, ByVal nTabOrigin As Long) As Long
 Private Declare PtrSafe Function SetBkMode Lib "gdi32" (ByVal hDC As LongPtr, ByVal iBkMode As Long) As Long
 Private Declare PtrSafe Function SetTextColor Lib "gdi32" (ByVal hDC As LongPtr, ByVal crColor As Long) As Long
 
@@ -461,7 +461,7 @@ Public Sub RedrawControl()
     result = TabbedTextOut(hDcDrawing, 0, pxSize - 20, sW, Len(s), 2, TabStops(1), 0)
     
     
-    result = BitBlt(hDcDisplaySurface, GlobalRect.topleft.X, GlobalRect.topleft.Y, pxWidth, pxHeight, hDcDrawing, 0, 0, SRCCOPY)
+    result = BitBlt(hDcDisplaySurface, GlobalRect.topleft.x, GlobalRect.topleft.y, pxWidth, pxHeight, hDcDrawing, 0, 0, SRCCOPY)
     
     SelectObject hDcDrawing, bmpDrawingOrig
     SelectObject hDcBackground, bmpBackgroundOrig
@@ -476,10 +476,10 @@ Dim yPixPrPt As Double
     'Set Scope rectangle for use when invalidating paint area
     xPixPrPt = GetDeviceCaps(hDcDrawing, LOGPIXELSX) / 72
     yPixPrPt = GetDeviceCaps(hDcDrawing, LOGPIXELSY) / 72
-    GlobalRect.topleft.X = pDisplaySurface.Left * xPixPrPt
-    GlobalRect.topleft.Y = pDisplaySurface.Top * yPixPrPt
-    GlobalRect.btmRight.X = (pDisplaySurface.Left + pDisplaySurface.Width) * xPixPrPt
-    GlobalRect.btmRight.Y = (pDisplaySurface.Top + pDisplaySurface.Height) * yPixPrPt
+    GlobalRect.topleft.x = pDisplaySurface.Left * xPixPrPt
+    GlobalRect.topleft.y = pDisplaySurface.Top * yPixPrPt
+    GlobalRect.btmRight.x = (pDisplaySurface.Left + pDisplaySurface.Width) * xPixPrPt
+    GlobalRect.btmRight.y = (pDisplaySurface.Top + pDisplaySurface.Height) * yPixPrPt
     
     pxWidth = pDisplaySurface.Width * xPixPrPt
     pxHeight = pDisplaySurface.Height * yPixPrPt
@@ -488,10 +488,10 @@ Dim yPixPrPt As Double
     CenterPixelX = pxSize / 2
     CenterPixelY = pxSize / 2
     
-    LocalRect.topleft.X = 0
-    LocalRect.topleft.Y = 0
-    LocalRect.btmRight.X = pxWidth
-    LocalRect.btmRight.Y = pxHeight
+    LocalRect.topleft.x = 0
+    LocalRect.topleft.y = 0
+    LocalRect.btmRight.x = pxWidth
+    LocalRect.btmRight.y = pxHeight
     
     
     'Set radius equal to min(CenterPixelX,CenterPixelY)
@@ -781,10 +781,10 @@ Dim oPicture As IPicture
         
 End Function
 
-Private Function Ceiling(ByVal X As Double, Optional ByVal Factor As Double = 1) As Double
+Private Function Ceiling(ByVal x As Double, Optional ByVal Factor As Double = 1) As Double
     ' X is the value you want to round
     ' is the multiple to which you want to round
-    Ceiling = (Int(X / Factor) - (X / Factor - Int(X / Factor) > 0)) * Factor
+    Ceiling = (Int(x / Factor) - (x / Factor - Int(x / Factor) > 0)) * Factor
 End Function
 
 Private Function Min(ParamArray values() As Variant) As Variant

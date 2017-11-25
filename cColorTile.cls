@@ -297,7 +297,7 @@ Private Sub Class_Terminate()
     
 End Sub
 
-Private Sub pDisplaySurface_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
+Private Sub pDisplaySurface_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal y As Single)
     If Button <> 1 Then Exit Sub
     If pTileGroup Is Nothing Then Exit Sub
     
@@ -364,7 +364,7 @@ Public Sub RedrawControl()
     
     
     
-    result = BitBlt(hDcDisplaySurface, GlobalRect.topleft.X, GlobalRect.topleft.Y, pxWidth, pxHeight, hDcDrawing, 0, 0, SRCCOPY)
+    result = BitBlt(hDcDisplaySurface, GlobalRect.topleft.x, GlobalRect.topleft.y, pxWidth, pxHeight, hDcDrawing, 0, 0, SRCCOPY)
     
     'Release resources
     SelectObject hDcDrawing, bmpDrawingOrig
@@ -378,25 +378,25 @@ Dim yPixPrPt As Double
     'Set Scope rectangle for use when invalidating paint area
     xPixPrPt = GetDeviceCaps(hDcDrawing, LOGPIXELSX) / 72
     yPixPrPt = GetDeviceCaps(hDcDrawing, LOGPIXELSY) / 72
-    GlobalRect.topleft.X = pDisplaySurface.Left * xPixPrPt
-    GlobalRect.topleft.Y = pDisplaySurface.Top * yPixPrPt
-    GlobalRect.btmRight.X = (pDisplaySurface.Left + pDisplaySurface.Width) * xPixPrPt
-    GlobalRect.btmRight.Y = (pDisplaySurface.Top + pDisplaySurface.Height) * yPixPrPt
+    GlobalRect.topleft.x = pDisplaySurface.Left * xPixPrPt
+    GlobalRect.topleft.y = pDisplaySurface.Top * yPixPrPt
+    GlobalRect.btmRight.x = (pDisplaySurface.Left + pDisplaySurface.Width) * xPixPrPt
+    GlobalRect.btmRight.y = (pDisplaySurface.Top + pDisplaySurface.Height) * yPixPrPt
     
     pxWidth = pDisplaySurface.Width * xPixPrPt
     pxHeight = pDisplaySurface.Height * yPixPrPt
   
-    LocalRect.topleft.X = 0
-    LocalRect.topleft.Y = 0
-    LocalRect.btmRight.X = pxWidth
-    LocalRect.btmRight.Y = pxHeight
+    LocalRect.topleft.x = 0
+    LocalRect.topleft.y = 0
+    LocalRect.btmRight.x = pxWidth
+    LocalRect.btmRight.y = pxHeight
     
-    Triangle(0).X = 0
-    Triangle(0).Y = pxHeight
-    Triangle(1).X = pxWidth
-    Triangle(1).Y = 0
-    Triangle(2).X = pxWidth
-    Triangle(2).Y = pxHeight
+    Triangle(0).x = 0
+    Triangle(0).y = pxHeight
+    Triangle(1).x = pxWidth
+    Triangle(1).y = 0
+    Triangle(2).x = pxWidth
+    Triangle(2).y = pxHeight
     
 End Sub
 

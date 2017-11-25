@@ -37,8 +37,8 @@ Public Type GUID          'For use when creating OLE pictureobject
 End Type
 
 Public Type POINT
-    X As Long
-    Y As Long
+    x As Long
+    y As Long
 End Type
 
 Public Type RECT
