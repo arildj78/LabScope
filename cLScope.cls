@@ -573,13 +573,13 @@ Dim i As Integer
     Dim minTickY As Double
     Dim Y As Double
     Dim X As Double
-    Dim l As Double
+    Dim L As Double
     
     minTickY = pTgtLabL - pUnitsPrDivision * Int((pTgtLabL - TgtLmin) / pUnitsPrDivision)
     For i = 0 To pDivisions
-        l = i * pUnitsPrDivision + minTickY
-        Y = r2r(TgtLmin, TgtLmax, l, pxHeight - pPadding, pPadding)
-        X = r2r(0, pUnitsPrDivision * pDivisions, Abs(pTgtLabL - l), pPadding + 10, pxWidth)
+        L = i * pUnitsPrDivision + minTickY
+        Y = r2r(TgtLmin, TgtLmax, L, pxHeight - pPadding, pPadding)
+        X = r2r(0, pUnitsPrDivision * pDivisions, Abs(pTgtLabL - L), pPadding + 10, pxWidth)
         
         MoveToEx hDcBackground, pPadding, Y, 0
         LineTo hDcBackground, X, Y
