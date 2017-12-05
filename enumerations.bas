@@ -139,3 +139,288 @@ Public Enum LocalErrors
     errAlreadyMemberOfGroup = 3
 End Enum
 
+
+
+'ColorManagement
+
+Public Type LabCOLOR
+  L As Long
+  a As Long
+  b As Long
+End Type
+
+Public Enum tColorSpace
+    Lab = 1
+    ProPhoto = 2
+    AdobeRGB = 3
+    sRGB = 4
+End Enum
+
+
+
+Public Enum GamutMapping
+    LCS_GM_BUSINESS = 1&
+    LCS_GM_GRAPHICS = 2&
+    LCS_GM_IMAGES = 4&
+    LCS_GM_ABS_COLORIMETRIC = 8&
+    LCS_GM_Saturation = 1&
+    LCS_GM_Rel_Colorimetric = 2&
+    LCS_GM_Perceptual = 4&
+End Enum
+
+Public Type CIEXYZ
+    ciexyzX As Long  'FXPT2DOT30
+    ciexyzY As Long  'FXPT2DOT30
+    ciexyzZ As Long  'FXPT2DOT30
+End Type
+
+Public Type CIEXYZTRIPLE
+    ciexyzRed   As CIEXYZ
+    ciexyzGreen As CIEXYZ
+    ciexyzBlue  As CIEXYZ
+End Type
+
+
+
+Public Type ColorPROFILE
+    dwType As Long
+    pProfileData As String
+    cbDataSize As Long
+End Type
+
+
+
+'*************************************************
+'      From minwindef.h
+'*************************************************
+
+Public Const MAX_PATH = 260
+
+'*************************************************
+'      From wingdi.h
+'*************************************************
+'/* Logcolorspace lcsType values */
+Public Enum tagLOGCOLORSPACE
+    LCS_CALIBRATED_RGB = 0&
+    LCS_sRGB = &H73524742                 'ASCII  'sRGB'
+    LCS_WINDOWS_COLOR_SPACE = &H57696E20  'ASCII  'Win '    '// Windows default color space
+End Enum
+
+Public Type tLOGCOLORSPACE
+    lcsSignature As Long
+    lcsVersion As Long
+    lcsSize As Long
+    lcsCSType As Long
+    lcsIntent As GamutMapping
+    lcsEndpoints As CIEXYZTRIPLE
+    lcsGammaRed As Long      'DWORD
+    lcsGammaGreen As Long    'DWORD
+    lcsGammaBlue As Long     'DWORD
+    lcsFilename(1 To MAX_PATH) As Byte    'TCHAR
+End Type
+
+'/* Logcolorspace signature */
+Public Const LCS_SIGNATURE = &H50534F43    'PSOC'
+
+
+
+
+'*************************************************
+'      From Icm.h
+'*************************************************
+'//
+'// Profile types to be used in the PROFILE structure
+'//
+Public Enum tagPROFILE_TYPE
+    PROFILE_FILENAME = 1      '// profile data is NULL terminated filename
+    PROFILE_MEMBUFFER = 2     '// profile data is a buffer containing the profile
+End Enum
+
+'//
+'// Desired access mode for opening profiles
+'//
+Public Enum tagDesiredAccess
+    PROFILE_READ = 1&        '// opened for read access
+    PROFILE_READWRITE = 2&   '// opened for read and write access
+End Enum
+
+Public Const DONT_USE_EMBEDDED_WCS_PROFILES = 1&
+
+Public Type RGBCOLOR
+    red As Integer
+    green As Integer
+    blue As Integer
+End Type
+
+Public Enum COLORTYPE
+  COLOR_GRAY = 1
+  COLOR_RGB = 2
+  COLOR_XYZ = 3
+  COLOR_Yxy = 4
+  COLOR_Lab = 5
+  COLOR_3_CHANNEL = 6
+  COLOR_CMYK = 7
+  COLOR_5_CHANNEL = 8
+  COLOR_6_CHANNEL = 9
+  COLOR_7_CHANNEL = 10
+  COLOR_8_CHANNEL = 11
+  COLOR_NAMED = 12
+End Enum
+
+'//
+'// Device color data type
+'//
+Public Enum COLORDATATYPE
+    COLOR_BYTE = 1                 '// BYTE per channel. data range [0, 255]
+    COLOR_WORD = 2                 '// WORD per channel. data range [0, 65535]
+    COLOR_FLOAT = 3                '// FLOAT per channel. IEEE 32-bit floating point
+    COLOR_S2DOT13FIXED = 4         '// WORD per channel. data range [-4, +4] using s2.13
+    COLOR_10b_R10G10B10A2 = 5      '// Packed WORD per channel.  data range [0, 1]
+    COLOR_10b_R10G10B10A2_XR = 6   '// Packed extended range WORD per channel.  data range [-1, 3]
+                                   '// using 4.0 scale and -1.0 bias.
+    COLOR_FLOAT16 = 7              '// FLOAT16 per channel.
+End Enum
+
+
+'*************************************************
+'      From winnt.h
+'*************************************************
+Public Enum tagShareMode
+    FILE_SHARE_READ = 1&        '// opened for read access
+    FILE_SHARE_WRITE = 2&   '// opened for read and write access
+End Enum
+
+
+
+
+'*************************************************
+'      From fileapi.h
+'*************************************************
+Public Enum tagCreationMode
+    CREATE_NEW = 1&           '// opened for read access
+    CREATE_ALWAYS = 2&        '// opened for read and write access
+    OPEN_EXISTING = 3&        '// opened for read access
+    OPEN_ALWAYS = 4&          '// opened for read and write access
+    TRUNCATE_EXISTING = 5&    '// opened for read and write access
+End Enum
+
+
+
+
+
+'*************************************************
+'      From ICC v4 standard
+'*************************************************
+Public Type tIccHeader
+    ProfileSize As Long
+    PreferredCMM As Long
+    ProfileVersion As Long
+    DeviceClass As Long
+    ColorSpace As Long
+    PCS As Long
+    
+    CreatedDateTime(1 To 12) As Byte
+    
+    signature As Long
+    PrimaryPlatformSignature As Long
+    Flags As Long
+    DeviceManufacturer As Long
+    DeviceModel As Long
+    
+    DeviceAttributes(1 To 8) As Byte
+    
+    RenderingIntent As Long
+    
+    IlluminantCIEXYZ(1 To 12) As Byte
+
+    ProfileCreator As Long
+    
+    ProfileID(1 To 16) As Byte
+    reserved(1 To 28) As Byte
+End Type
+
+
+Public Type tIccTagEntry
+    signature As Long
+    StringSig As String
+    offset As Long
+    size As Long
+End Type
+Public Type tIccTagTable
+    count As Long
+    tagEntries() As tIccTagEntry
+End Type
+
+Public Type CurveType
+    signature As Long
+    
+    'parametricCurveType
+    FunctionType As Integer
+    g As Long
+    a As Long
+    b As Long
+    c As Long
+    d As Long
+    e As Long
+    f As Long
+    
+    'CurveType
+    n As Long
+    curve() As Long
+    
+    'implementation specicfic
+    size As Long
+End Type
+
+'Public Type lut16Type
+'    signature As Long
+'    i As Byte
+'    o As Byte
+'    g As Byte
+'    e(1 To 9) As Long
+''    n As Long
+'    m As Long
+'    inTables() As Long
+'    CLUT() As Long
+'    outTables() As Long
+'End Type
+
+Public Type lutBToAType
+    signature As Long
+    i As Byte
+    o As Byte
+    g As Byte
+    n As Long
+    m As Long
+    offsetBcurve As Long
+    offsetMatrix As Long
+    offsetMcurve As Long
+    offsetCLUT As Long
+    offsetAcurve As Long
+    Bcurve() As CurveType
+    Matrix(1 To 12) As Long
+    Mcurve() As CurveType
+    CLUT() As Long
+    CLUTgridPoints(0 To 15) As Byte
+    CLUTchannels As Byte
+    CLUTbitCount As Byte
+    Acurve() As CurveType
+    
+    'implementation specicfic
+    legacyPCS As Boolean
+End Type
+
+'Implementation specific
+Public Enum FunctionType
+    lut16Table = -2
+    curve = -1
+    PARAMg = 0
+    PARAMgab = 1
+    PARAMgabc = 2
+    PARAMgabcd = 3
+    PARAMgabcdef = 4
+End Enum
+
+    
+
+

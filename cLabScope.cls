@@ -46,7 +46,26 @@ Private Declare PtrSafe Function HeapDestroy Lib "kernel32" (ByVal hHeap As Long
 Private Declare PtrSafe Function GetWindowText Lib "user32" Alias "GetWindowTextA" (ByVal hWnd As LongPtr, ByVal lpString As LongPtr, ByVal nMaxCount As Long) As Long
 Private Declare PtrSafe Function FindWindow Lib "user32" Alias "FindWindowA" (ByVal lpClassName As String, ByVal lpWindowName As String) As LongPtr
 
-
+'Color management
+Private Declare PtrSafe Function CheckColors Lib "Mscms" (ByVal hColorTransform As LongPtr, ByRef paInputColors As Any, ByVal nColors As Long, ByVal ctInput As Long, ByRef paResult As Any) As Boolean
+Private Declare PtrSafe Function CreateColorTransform Lib "Mscms" Alias "CreateColorTransformA" (ByVal pLogColorSpace As LongPtr, ByVal hDestProfile As LongPtr, ByVal hTargetProfile As LongPtr, ByVal dwFlags As Long) As LongPtr
+Private Declare PtrSafe Function WcsOpenColorProfile Lib "Mscms" Alias "WcsOpenColorProfileA" (ByRef pCDMPProfile As Any, ByVal pCAMPProfile As LongPtr, ByVal pGMMPProfile As LongPtr, ByVal dwDesiredAccess As Long, ByVal dwShareMode As Long, ByVal dwCreationMode As Long, ByVal dwFlags As Long) As LongPtr
+Private Declare PtrSafe Function CloseColorProfile Lib "Mscms" (ByVal hProfile As LongPtr) As Boolean
+Private Declare PtrSafe Function CreateColorSpace Lib "gdi32" Alias "CreateColorSpaceA" (ByVal lpLogColorSpace As LongPtr) As LongPtr
+Private Declare PtrSafe Function DeleteColorSpace Lib "gdi32" (ByVal hColorSpace As LongPtr) As Boolean
+Private Declare PtrSafe Function DeleteColorTransform Lib "Mscms" (ByVal hColorSpace As LongPtr) As Boolean
+Private Declare PtrSafe Function TranslateColors Lib "Mscms" (ByVal hColorTransform As LongPtr, ByRef paInputColors As Any, ByVal nColors As LongPtr, ByVal ctInput As Long, ByRef paOutputColors As Any, ByVal ctOutput As Long) As Boolean
+Private Declare PtrSafe Function WcsTranslateColors Lib "Mscms" ( _
+                ByVal hColorTransform As LongPtr, _
+                ByVal nColors As Long, _
+                ByVal nInputChannels As Long, _
+                ByVal cdtInput As Long, _
+                ByVal cbInput As Long, _
+                ByVal pInputData As LongPtr, _
+                ByVal nOutputChannels As Long, _
+                ByVal cdtOutput As Long, _
+                ByVal cbOutput As Long, _
+                ByVal pOutputData As LongPtr) As Boolean
 
 
 Private pParent As Object
@@ -70,18 +89,22 @@ Private pTgtLabA As Double
 Private pTgtLabB As Double
 Private pLabExaggeration As Double
 Private pScrollBeyondLimit As Boolean
+Private pColorSpace As tColorSpace
 ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
 Private hDcDisplaySurface As LongPtr
 Private hDcDrawing As LongPtr
 Private hDcBackground As LongPtr
+Private hDcGamutMask As LongPtr
 Private hDcLabSurface As LongPtr
 
 Private bmpLabSurfaceOrig As LongPtr
+Private bmpGamutMaskOrig As LongPtr
 Private bmpBackgroundOrig As LongPtr
 
 
 Private BackgroundBrush As LongPtr
+Private GamutMaskBrush As LongPtr
 Private ReticleBrush As LongPtr
 Private ForegroundPen As LongPtr
 Private LightPen As LongPtr
@@ -91,6 +114,7 @@ Private LightPen As LongPtr
 Private bmpDrawingOrig As LongPtr
 Private hHeap As LongPtr
 Private bmpLabSurface As LongPtr
+Private bmpGamutMask As LongPtr
 Private bmpBackground As LongPtr
 Private bmpDrawing As LongPtr
 Private hWndForm As LongPtr
@@ -112,6 +136,10 @@ Private TgtBmax As Double
 
 Private bi As BITMAPINFO
 
+Dim b2a1 As lutBToAType
+Dim gamt As lutBToAType
+
+
 
 
 
@@ -121,8 +149,8 @@ Private bi As BITMAPINFO
 Public Property Get HitLabA() As Double
     HitLabA = pHitLabA
 End Property
-Public Property Let HitLabA(Value As Double)
-    pHitLabA = Value
+Public Property Let HitLabA(value As Double)
+    pHitLabA = value
     RedrawControl
 End Property
 
@@ -133,8 +161,8 @@ End Property
 Public Property Get HitLabB() As Double
     HitLabB = pHitLabB
 End Property
-Public Property Let HitLabB(Value As Double)
-    pHitLabB = Value
+Public Property Let HitLabB(value As Double)
+    pHitLabB = value
     RedrawControl
 End Property
 
@@ -144,8 +172,8 @@ End Property
 Public Property Get BackColor() As Double
     BackColor = pBackColor
 End Property
-Public Property Let BackColor(Value As Double)
-    pBackColor = Value
+Public Property Let BackColor(value As Double)
+    pBackColor = value
     RedrawControl
 End Property
 
@@ -155,8 +183,8 @@ End Property
 Public Property Get ForeColor() As Double
     ForeColor = pForeColor
 End Property
-Public Property Let ForeColor(Value As Double)
-    pForeColor = Value
+Public Property Let ForeColor(value As Double)
+    pForeColor = value
     DeleteObject (ForegroundPen)
     ForegroundPen = CreatePen(PS_Solid, pLineWidth, pForeColor)
     Draw_Background
@@ -170,8 +198,8 @@ End Property
 Public Property Get Spokes() As Double
     Spokes = pSpokes
 End Property
-Public Property Let Spokes(Value As Double)
-    pSpokes = Value
+Public Property Let Spokes(value As Double)
+    pSpokes = value
     Draw_Background
     RedrawControl
 End Property
@@ -183,8 +211,8 @@ End Property
 Public Property Get Rings() As Double
     Rings = pRings
 End Property
-Public Property Let Rings(Value As Double)
-    pRings = Value
+Public Property Let Rings(value As Double)
+    pRings = value
     DefineDimensions
     CalculateLabSpace
     Draw_Background
@@ -198,8 +226,8 @@ End Property
 Public Property Get Padding() As Double
     Padding = pPadding
 End Property
-Public Property Let Padding(Value As Double)
-    If Value < Radius Then pPadding = Value _
+Public Property Let Padding(value As Double)
+    If value < Radius Then pPadding = value _
                       Else pPadding = Radius
     DefineDimensions
     CalculateLabSpace
@@ -215,8 +243,8 @@ End Property
 Public Property Get LineWidth() As Double
     LineWidth = pLineWidth
 End Property
-Public Property Let LineWidth(Value As Double)
-    pLineWidth = Value
+Public Property Let LineWidth(value As Double)
+    pLineWidth = value
     DeleteObject (ForegroundPen)
     ForegroundPen = CreatePen(PS_Solid, pLineWidth, pForeColor)
     Draw_Background
@@ -229,8 +257,8 @@ End Property
 Public Property Get ReticleSize() As Double
     ReticleSize = pReticleSize
 End Property
-Public Property Let ReticleSize(Value As Double)
-    pReticleSize = Value
+Public Property Let ReticleSize(value As Double)
+    pReticleSize = value
     ReticleSizeHalf = pReticleSize / 2
     RedrawControl
 End Property
@@ -241,8 +269,8 @@ End Property
 Public Property Get TgtLabL() As Double
     TgtLabL = pTgtLabL
 End Property
-Public Property Let TgtLabL(Value As Double)
-    pTgtLabL = Value
+Public Property Let TgtLabL(value As Double)
+    pTgtLabL = value
     CalculateLabSpace
     Draw_Background
     RedrawControl
@@ -253,8 +281,8 @@ End Property
 Public Property Get TgtLabA() As Double
     TgtLabA = pTgtLabA
 End Property
-Public Property Let TgtLabA(Value As Double)
-    pTgtLabA = Value
+Public Property Let TgtLabA(value As Double)
+    pTgtLabA = value
     CalculateLabSpace
     Draw_Background
     RedrawControl
@@ -265,8 +293,8 @@ End Property
 Public Property Get TgtLabB() As Double
     TgtLabB = pTgtLabB
 End Property
-Public Property Let TgtLabB(Value As Double)
-    pTgtLabB = Value
+Public Property Let TgtLabB(value As Double)
+    pTgtLabB = value
     CalculateLabSpace
     Draw_Background
     RedrawControl
@@ -279,8 +307,8 @@ End Property
 Public Property Get LabExaggeration() As Double
     LabExaggeration = pLabExaggeration
 End Property
-Public Property Let LabExaggeration(Value As Double)
-    pLabExaggeration = Value
+Public Property Let LabExaggeration(value As Double)
+    pLabExaggeration = value
     CalculateLabSpace
     Draw_Background
     RedrawControl
@@ -293,8 +321,8 @@ End Property
 Public Property Get UnitsPrDivision() As Double
     UnitsPrDivision = pUnitsPrDivision
 End Property
-Public Property Let UnitsPrDivision(Value As Double)
-    If Value > 0 Then pUnitsPrDivision = Value _
+Public Property Let UnitsPrDivision(value As Double)
+    If value > 0 Then pUnitsPrDivision = value _
                  Else Err.Raise vbObjectError + errInvalidPropertyValue, "cScope.UnitsPrDivision", "UnitsPrDivision should be a double greater than 0"
     
     DefineDimensions
@@ -309,9 +337,20 @@ End Property
 Public Property Get ScrollBeyondLimit() As Double
     ScrollBeyondLimit = pScrollBeyondLimit
 End Property
-Public Property Let ScrollBeyondLimit(Value As Double)
-    pScrollBeyondLimit = Value
+Public Property Let ScrollBeyondLimit(value As Double)
+    pScrollBeyondLimit = value
     CalculateLabSpace
+    Draw_Background
+    RedrawControl
+End Property
+''''''''''''''''''''''
+' ColorSpace property
+''''''''''''''''''''''
+Public Property Get ColorSpace() As tColorSpace
+    ColorSpace = pColorSpace
+End Property
+Public Property Let ColorSpace(value As tColorSpace)
+    pColorSpace = value
     Draw_Background
     RedrawControl
 End Property
@@ -333,7 +372,8 @@ Public Sub InitiateProperties(ByRef Parent As Object, _
                               Optional TgtLabA As Double = 0#, _
                               Optional TgtLabB As Double = 0#, _
                               Optional LabExaggeration As Double = 5#, _
-                              Optional ScrollBeyondLimit As Boolean = True)
+                              Optional ScrollBeyondLimit As Boolean = True, _
+                              Optional ColorSpace As tColorSpace = tColorSpace.AdobeRGB)
 Dim bufferSize As Long
 Dim result As Long
     hHeap = HeapCreate(0, 0, 0)  ' Create a heap memory object to be used for allocating memory to usercontrol images (Max size 2^23 = 8Mb)
@@ -357,19 +397,21 @@ Dim result As Long
     pTgtLabB = TgtLabB
     pLabExaggeration = LabExaggeration
     pScrollBeyondLimit = ScrollBeyondLimit
+    pColorSpace = ColorSpace
 
     'Convert system colors to RGB values
     If (pBackColor And &H80000000) = &H80000000 Then pBackColor = GetSysColor(pBackColor And &HFFFFFFF)      'Convert system color to RGB
     If (pForeColor And &H80000000) = &H80000000 Then pForeColor = GetSysColor(pForeColor And &HFFFFFFF)      'Convert system color to RGB
     If (pReticleColor And &H80000000) = &H80000000 Then pReticleColor = GetSysColor(pReticleColor And &HFFFFFFF)      'Convert system color to RGB
     
-
+    
     
     'Create a Device Context to draw on and allocate memory for background image
     Find_Window_handle
     hDcDisplaySurface = GetDC(hWndForm)
     hDcDrawing = CreateCompatibleDC(0)            ' Create DeviceContext that matches the screen that image1 is shown on
     hDcBackground = CreateCompatibleDC(0)         ' Create DeviceContext that matches the screen that image1 is shown on
+    hDcGamutMask = CreateCompatibleDC(0)         ' Create DeviceContext that matches the screen that image1 is shown on
     hDcLabSurface = CreateCompatibleDC(0)
     
     SetBkMode hDcBackground, BkMode.TRANSPARENT
@@ -378,15 +420,23 @@ Dim result As Long
     
     bmpDrawing = CreateCompatibleBitmap(hDcDisplaySurface, pxWidth, pxHeight)  'This line creates a blank bitmap for doublebuffered drawing compatible with pDisplaySurface
     bmpBackground = CreateCompatibleBitmap(hDcDisplaySurface, pxWidth, pxHeight) 'This line creates a blank bitmap for background compatible with pDisplaySurface
+    bmpGamutMask = CreateCompatibleBitmap(hDcDisplaySurface, 100, 100)  'This line creates a blank bitmap for background compatible with pDisplaySurface
     bmpLabSurface = CreateCompatibleBitmap(hDcDisplaySurface, 100, 100) 'This line creates a blank bitmap for background compatible with pDisplaySurface
     Set pDisplaySurface.Picture = HandleToPicture(bmpDrawing, PICTYPE_BITMAP)
     
     
     BackgroundBrush = CreateSolidBrush(pBackColor)
+    GamutMaskBrush = CreateSolidBrush(&H666666)
     ReticleBrush = CreateSolidBrush(pReticleColor)
     ForegroundPen = CreatePen(PS_Solid, 1, pForeColor)
     LightPen = CreatePen(PS_Solid, pLineWidth, RGB(255, 255, 255))
 
+    
+    'ColorManagement
+    'Load ICC data
+    Get_B2A1_gamt "C:\Windows\System32\spool\drivers\color\AdobeRGB1998.icc", b2a1, gamt
+
+    
     
     'Create the background for the control
     CalculateLabSpace
@@ -401,17 +451,20 @@ Private Sub Class_Terminate()
     HeapDestroy hHeap                  ' Heap memory object
     
     DeleteObject BackgroundBrush
+    DeleteObject GamutMaskBrush
     DeleteObject ReticleBrush
     DeleteObject ForegroundPen
     DeleteObject LightPen
     
     DeleteObject bmpDrawing
     DeleteObject bmpBackground
+    DeleteObject bmpGamutMask
     DeleteObject bmpLabSurface
 
     ReleaseDC hWndForm, hDcDisplaySurface
     DeleteDC hDcDrawing
     DeleteDC hDcBackground                       ' Gdi32 Device Context created earlier
+    DeleteDC hDcGamutMask                        ' Gdi32 Device Context created earlier
     DeleteDC hDcLabSurface                       ' Gdi32 Device Context created earlier
 End Sub
 
@@ -536,6 +589,7 @@ Dim i As Integer
     Dim BrushBackgroundOrig As LongPtr
     Dim PenBackgroundOrig As LongPtr
     Dim backgroundGradient As LongPtr
+    Dim backgroundInGamut As LongPtr
     Dim r As Long
     Dim c As Long
    
@@ -552,8 +606,10 @@ Dim i As Integer
     BytesPrScanline = Ceiling(bi.bmiHeader.biWidth * bi.bmiHeader.biBitCount / 8, 8) 'Number of Double Words to each line.
 
     backgroundGradient = HeapAlloc(hHeap, 0, BytesPrScanline * bi.bmiHeader.biHeight)
+    backgroundInGamut = HeapAlloc(hHeap, 0, BytesPrScanline * bi.bmiHeader.biHeight)
     
     result = GetDIBits(hDcLabSurface, bmpLabSurface, 0, bi.bmiHeader.biHeight, backgroundGradient, bi, DIB_RGB_COLORS)
+    result = GetDIBits(hDcGamutMask, bmpGamutMask, 0, bi.bmiHeader.biHeight, backgroundGradient, bi, DIB_RGB_COLORS)
     
     Dim xFract As Double
     Dim yFract As Double
@@ -561,26 +617,51 @@ Dim i As Integer
     Dim tgtLabBRange As Double
     Dim LabA As Double
     Dim LabB As Double
+    Dim LabANoExAgg As Double
+    Dim LabBNoExAgg As Double
     Dim sR As Double
     Dim sG As Double
     Dim sB As Double
+    Dim InGamut As Boolean
     
     tgtLabARange = TgtAmax - TgtAmin
     tgtLabBRange = TgtBmax - TgtBmin
     
     For r = 0 To 99
        yFract = r / 99
+       LabBNoExAgg = pTgtLabB + (TgtBmin + yFract * tgtLabBRange - pTgtLabB)
        LabB = pTgtLabB + pLabExaggeration * (TgtBmin + yFract * tgtLabBRange - pTgtLabB)
        For c = 0 To 99
             xFract = c / 99
+            LabANoExAgg = pTgtLabA + (TgtAmin + xFract * tgtLabARange - pTgtLabA)
             LabA = pTgtLabA + pLabExaggeration * (TgtAmin + xFract * tgtLabARange - pTgtLabA)
            
             LAB2sRGB pTgtLabL, LabA, LabB, sR, sG, sB
-            RGBtuple(0) = sB 'Blue
-            RGBtuple(1) = sG 'Green
-            RGBtuple(2) = sR 'Red
-            RGBtuple(3) = &H0  '***Reserved***
+            Select Case pColorSpace
+                Case tColorSpace.AdobeRGB:  InGamut = InGamut_aRGB(TgtLabL, LabANoExAgg, LabBNoExAgg)
+                Case tColorSpace.sRGB:      InGamut = InGamut_sRGB(TgtLabL, LabANoExAgg, LabBNoExAgg)
+                Case Else:                  InGamut = True
+            End Select
+            
+            
+            If InGamut Then
+                RGBtuple(0) = sB 'Blue
+                RGBtuple(1) = sG 'Green
+                RGBtuple(2) = sR 'Red
+                RGBtuple(3) = &H0  '***Reserved***
+            Else
+                RGBtuple(0) = 150 'Blue
+                RGBtuple(1) = 150 'Green
+                RGBtuple(2) = 150 'Red
+                RGBtuple(3) = &H0  '***Reserved***
+            End If
             Mem_Copy ByVal backgroundGradient + BytesPrScanline * r + c * 4, RGBtuple(0), 4
+            
+            RGBtuple(0) = xFract * 255 'Blue
+            RGBtuple(1) = xFract * 0 'Green
+            RGBtuple(2) = xFract * 255 'Red
+            RGBtuple(3) = &H0  '***Reserved***
+            Mem_Copy ByVal backgroundInGamut + BytesPrScanline * r + c * 4, RGBtuple(0), 4
         Next c
     Next r
     
@@ -589,14 +670,18 @@ Dim i As Integer
 
    
     result = SetDIBits(hDcLabSurface, bmpLabSurface, 0, bi.bmiHeader.biHeight, backgroundGradient, bi, DIB_RGB_COLORS)
+    result = SetDIBits(hDcGamutMask, bmpGamutMask, 0, bi.bmiHeader.biHeight, backgroundInGamut, bi, DIB_RGB_COLORS)
     
     
     bmpBackgroundOrig = SelectObject(hDcBackground, bmpBackground)
+    bmpGamutMaskOrig = SelectObject(hDcGamutMask, bmpGamutMask)
     bmpLabSurfaceOrig = SelectObject(hDcLabSurface, bmpLabSurface)
     
     result = FillRect(hDcBackground, LocalRect, BackgroundBrush)
     result = StretchBlt(hDcBackground, 0, 0, pxSize, pxSize, hDcLabSurface, 0, 0, 100, 100, SRCCOPY)
+    'result = StretchBlt(hDcBackground, 0, 0, pxSize, pxSize, hDcGamutMask, 0, 0, 100, 100, TernaryRasterOperations.SRCCOPY)
 
+    HeapFree hHeap, 0, backgroundInGamut
     HeapFree hHeap, 0, backgroundGradient
     
 
@@ -788,19 +873,19 @@ Private Function Ceiling(ByVal x As Double, Optional ByVal Factor As Double = 1)
 End Function
 
 Private Function Min(ParamArray values() As Variant) As Variant
-   Dim minValue, Value As Variant
+   Dim minValue, value As Variant
    minValue = values(0)
-   For Each Value In values
-       If Value < minValue Then minValue = Value
+   For Each value In values
+       If value < minValue Then minValue = value
    Next
    Min = minValue
 End Function
 
 Private Function Max(ParamArray values() As Variant) As Variant
-   Dim maxValue, Value As Variant
+   Dim maxValue, value As Variant
    maxValue = values(0)
-   For Each Value In values
-       If Value > maxValue Then maxValue = Value
+   For Each value In values
+       If value > maxValue Then maxValue = value
    Next
    Max = maxValue
 End Function

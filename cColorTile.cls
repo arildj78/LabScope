@@ -97,8 +97,8 @@ Private pFrameThickness As Long
 Public Property Get LabScope() As cLabScope
     Set LabScope = pLabScope
 End Property
-Public Property Let LabScope(Value As cLabScope)
-    Set pLabScope = Value
+Public Property Let LabScope(value As cLabScope)
+    Set pLabScope = value
 End Property
 ''''''''''''''''''''''
 ' LScope property
@@ -106,8 +106,8 @@ End Property
 Public Property Get LScope() As cLScope
     Set LScope = pLScope
 End Property
-Public Property Let LScope(Value As cLScope)
-    Set pLScope = Value
+Public Property Let LScope(value As cLScope)
+    Set pLScope = value
 End Property
 ''''''''''''''''''''''
 ' TgtLabL property
@@ -115,8 +115,8 @@ End Property
 Public Property Get TgtLabL() As Double
     TgtLabL = pTgtLabL
 End Property
-Public Property Let TgtLabL(Value As Double)
-    pTgtLabL = Value
+Public Property Let TgtLabL(value As Double)
+    pTgtLabL = value
     UpdateTgtBrush
     RedrawControl
 End Property
@@ -126,8 +126,8 @@ End Property
 Public Property Get TgtLabA() As Double
     TgtLabA = pTgtLabA
 End Property
-Public Property Let TgtLabA(Value As Double)
-    pTgtLabA = Value
+Public Property Let TgtLabA(value As Double)
+    pTgtLabA = value
     UpdateTgtBrush
     RedrawControl
 End Property
@@ -137,8 +137,8 @@ End Property
 Public Property Get TgtLabB() As Double
     TgtLabB = pTgtLabB
 End Property
-Public Property Let TgtLabB(Value As Double)
-    pTgtLabB = Value
+Public Property Let TgtLabB(value As Double)
+    pTgtLabB = value
     UpdateTgtBrush
     RedrawControl
 End Property
@@ -149,8 +149,8 @@ End Property
 Public Property Get HitLabL() As Double
     HitLabL = pHitLabL
 End Property
-Public Property Let HitLabL(Value As Double)
-    pHitLabL = Value
+Public Property Let HitLabL(value As Double)
+    pHitLabL = value
     UpdateHitBrush
     RedrawControl
 End Property
@@ -160,8 +160,8 @@ End Property
 Public Property Get HitLabA() As Double
     HitLabA = pHitLabA
 End Property
-Public Property Let HitLabA(Value As Double)
-    pHitLabA = Value
+Public Property Let HitLabA(value As Double)
+    pHitLabA = value
     UpdateHitBrush
     RedrawControl
 End Property
@@ -171,8 +171,8 @@ End Property
 Public Property Get HitLabB() As Double
     HitLabB = pHitLabB
 End Property
-Public Property Let HitLabB(Value As Double)
-    pHitLabB = Value
+Public Property Let HitLabB(value As Double)
+    pHitLabB = value
     UpdateHitBrush
     RedrawControl
 End Property
@@ -182,9 +182,9 @@ End Property
 Public Property Get Frame() As Boolean
     Frame = pFrame
 End Property
-Public Property Let Frame(Value As Boolean)
-    If pFrame <> Value Then
-        pFrame = Value
+Public Property Let Frame(value As Boolean)
+    If pFrame <> value Then
+        pFrame = value
         RedrawControl
     End If
 End Property
@@ -194,8 +194,8 @@ End Property
 Public Property Get FrameThickness() As Long
     FrameThickness = pFrameThickness
 End Property
-Public Property Let FrameThickness(Value As Long)
-    pFrameThickness = Value
+Public Property Let FrameThickness(value As Long)
+    pFrameThickness = value
     RedrawControl
 End Property
 ''''''''''''''''''''''
@@ -204,8 +204,8 @@ End Property
 Public Property Get TileGroup() As Collection
     Set TileGroup = pTileGroup
 End Property
-Public Property Let TileGroup(Value As Collection)
-    Set pTileGroup = Value
+Public Property Let TileGroup(value As Collection)
+    Set pTileGroup = value
 End Property
 
 
@@ -309,7 +309,7 @@ Private Sub pDisplaySurface_MouseDown(ByVal Button As Integer, ByVal Shift As In
     
     If NewState Then
         'This tile is beeing selected. Deselect all others
-        For i = 1 To pTileGroup.Count
+        For i = 1 To pTileGroup.count
             Set tile = pTileGroup(i)
             If tile Is Me Then
                 LabScope.SetColors pTgtLabL, pTgtLabA, pTgtLabB, pHitLabA, pHitLabB

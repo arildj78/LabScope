@@ -112,8 +112,8 @@ Private HitTriangle(0 To 2) As POINT
 Public Property Get HitLabL() As Double
     HitLabL = pHitLabL
 End Property
-Public Property Let HitLabL(Value As Double)
-    pHitLabL = Value
+Public Property Let HitLabL(value As Double)
+    pHitLabL = value
     RedrawControl
 End Property
 
@@ -123,8 +123,8 @@ End Property
 Public Property Get ForeColor() As Double
     ForeColor = pForeColor
 End Property
-Public Property Let ForeColor(Value As Double)
-    pForeColor = Value
+Public Property Let ForeColor(value As Double)
+    pForeColor = value
     DeleteObject (ForegroundPen)
     ForegroundPen = CreatePen(PS_Solid, pLineWidth, pForeColor)
     Draw_Background
@@ -140,8 +140,8 @@ End Property
 Public Property Get Padding() As Double
     Padding = pPadding
 End Property
-Public Property Let Padding(Value As Double)
-    If Value < pxWidth / 2 Then pPadding = Value _
+Public Property Let Padding(value As Double)
+    If value < pxWidth / 2 Then pPadding = value _
                          Else pPadding = pxWidth / 2
     DefineDimensions
     CalculateLabSpace
@@ -159,8 +159,8 @@ End Property
 Public Property Get LineWidth() As Double
     LineWidth = pLineWidth
 End Property
-Public Property Let LineWidth(Value As Double)
-    pLineWidth = Value
+Public Property Let LineWidth(value As Double)
+    pLineWidth = value
     DeleteObject (ForegroundPen)
     ForegroundPen = CreatePen(PS_Solid, pLineWidth, pForeColor)
     Draw_Background
@@ -173,8 +173,8 @@ End Property
 Public Property Get Divisions() As Double
     Divisions = pDivisions
 End Property
-Public Property Let Divisions(Value As Double)
-    pDivisions = Value
+Public Property Let Divisions(value As Double)
+    pDivisions = value
     CalculateLabSpace
     DefineDimensions
     Draw_Background
@@ -187,8 +187,8 @@ End Property
 Public Property Get ReticleSize() As Double
     ReticleSize = pReticleSize
 End Property
-Public Property Let ReticleSize(Value As Double)
-    pReticleSize = Value
+Public Property Let ReticleSize(value As Double)
+    pReticleSize = value
     ReticleSizeHalf = pReticleSize / 2
     RedrawControl
 End Property
@@ -199,8 +199,8 @@ End Property
 Public Property Get TgtLabL() As Double
     TgtLabL = pTgtLabL
 End Property
-Public Property Let TgtLabL(Value As Double)
-    pTgtLabL = Value
+Public Property Let TgtLabL(value As Double)
+    pTgtLabL = value
     CalculateLabSpace
     Draw_Background
     RedrawControl
@@ -211,8 +211,8 @@ End Property
 Public Property Get TgtLabA() As Double
     TgtLabA = pTgtLabA
 End Property
-Public Property Let TgtLabA(Value As Double)
-    pTgtLabA = Value
+Public Property Let TgtLabA(value As Double)
+    pTgtLabA = value
     CalculateLabSpace
     Draw_Background
     RedrawControl
@@ -223,8 +223,8 @@ End Property
 Public Property Get TgtLabB() As Double
     TgtLabB = pTgtLabB
 End Property
-Public Property Let TgtLabB(Value As Double)
-    pTgtLabB = Value
+Public Property Let TgtLabB(value As Double)
+    pTgtLabB = value
     CalculateLabSpace
     Draw_Background
     RedrawControl
@@ -237,8 +237,8 @@ End Property
 Public Property Get LabExaggeration() As Double
     LabExaggeration = pLabExaggeration
 End Property
-Public Property Let LabExaggeration(Value As Double)
-    pLabExaggeration = Value
+Public Property Let LabExaggeration(value As Double)
+    pLabExaggeration = value
     CalculateLabSpace
     Draw_Background
     RedrawControl
@@ -251,8 +251,8 @@ End Property
 Public Property Get UnitsPrDivision() As Double
     UnitsPrDivision = pUnitsPrDivision
 End Property
-Public Property Let UnitsPrDivision(Value As Double)
-    If Value > 0 Then pUnitsPrDivision = Value _
+Public Property Let UnitsPrDivision(value As Double)
+    If value > 0 Then pUnitsPrDivision = value _
                  Else Err.Raise vbObjectError + errInvalidPropertyValue, "cScope.UnitsPrDivision", "UnitsPrDivision should be a double greater than 0"
     
     DefineDimensions
@@ -267,8 +267,8 @@ End Property
 Public Property Get ScrollBeyondLimit() As Double
     ScrollBeyondLimit = pScrollBeyondLimit
 End Property
-Public Property Let ScrollBeyondLimit(Value As Double)
-    pScrollBeyondLimit = Value
+Public Property Let ScrollBeyondLimit(value As Double)
+    pScrollBeyondLimit = value
     CalculateLabSpace
     Draw_Background
     RedrawControl
@@ -704,19 +704,19 @@ Private Function Ceiling(ByVal x As Double, Optional ByVal Factor As Double = 1)
 End Function
 
 Private Function Min(ParamArray values() As Variant) As Variant
-   Dim minValue, Value As Variant
+   Dim minValue, value As Variant
    minValue = values(0)
-   For Each Value In values
-       If Value < minValue Then minValue = Value
+   For Each value In values
+       If value < minValue Then minValue = value
    Next
    Min = minValue
 End Function
 
 Private Function Max(ParamArray values() As Variant) As Variant
-   Dim maxValue, Value As Variant
+   Dim maxValue, value As Variant
    maxValue = values(0)
-   For Each Value In values
-       If Value > maxValue Then maxValue = Value
+   For Each value In values
+       If value > maxValue Then maxValue = value
    Next
    Max = maxValue
 End Function
