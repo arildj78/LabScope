@@ -46,6 +46,7 @@ Private Declare PtrSafe Function HeapDestroy Lib "kernel32" (ByVal hHeap As Long
 
 Private pParent As Object
 Private WithEvents pDisplaySurface As MSForms.Image
+Attribute pDisplaySurface.VB_VarHelpID = -1
 Private hDcDrawing As LongPtr
 Private bmpDrawingOrig As LongPtr
 Private bmpDrawing As LongPtr

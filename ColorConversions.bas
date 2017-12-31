@@ -66,7 +66,7 @@ End Sub
 '|    Conversion XYZ <--> sRGB       |
 '-------------------------------------
 
-Sub XYZ2sRGB(ByRef x As Double, ByRef y As Double, ByRef z As Double, ByRef sR As Double, ByRef sG As Double, ByRef sB As Double, Optional ByRef InGamut As Boolean)
+Sub XYZ2sRGB(ByRef x As Double, ByRef y As Double, ByRef z As Double, ByRef sR As Double, ByRef sG As Double, ByRef sB As Double, Optional ByRef inGamut As Boolean)
     'X, Y and Z input refer to a D65/2° standard illuminant.
     'sR, sG and sB (standard RGB) output range = 0 ÷ 255
 Dim var_X As Double
@@ -87,7 +87,7 @@ Dim var_B As Double
     var_B = var_X * 0.0719453 + var_Y * (-0.2289914) + var_Z * 1.4052427
     
     'Companding
-    InGamut = Not ((var_R < 0#) Or (var_G < 0#) Or (var_B <= 0#)) ' No RGB values fall below 0
+    inGamut = Not ((var_R < 0#) Or (var_G < 0#) Or (var_B <= 0#)) ' No RGB values fall below 0
 
     If (var_R < 0) Then var_R = 0 Else If (var_R > 0.0031308) Then var_R = 1.055 * (var_R ^ (1 / 2.4)) - 0.055 _
                                        Else var_R = 12.92 * var_R
@@ -100,7 +100,7 @@ Dim var_B As Double
     var_G = var_G * 255
     var_B = var_B * 255
    
-    InGamut = InGamut And (Not ((var_R > 255#) Or (var_G > 255#) Or (var_B > 255#))) 'No RGB values extend above 255
+    inGamut = inGamut And (Not ((var_R > 255#) Or (var_G > 255#) Or (var_B > 255#))) 'No RGB values extend above 255
     
     sR = Min(var_R, 255)
     sG = Min(var_G, 255)
@@ -260,14 +260,14 @@ End Sub
 '***************
 '    sRGB
 '***************
-Public Sub LAB2sRGB(ByRef LabL As Double, ByRef LabA As Double, ByRef LabB As Double, ByRef r As Double, ByRef g As Double, ByRef b As Double, Optional InGamut As Boolean)
+Public Sub LAB2sRGB(ByRef LabL As Double, ByRef LabA As Double, ByRef LabB As Double, ByRef r As Double, ByRef g As Double, ByRef b As Double, Optional inGamut As Boolean)
 
     Dim x As Double
     Dim y As Double
     Dim z As Double
     
     LAB2XYZ LabL, LabA, LabB, x, y, z
-    XYZ2sRGB x, y, z, r, g, b, InGamut
+    XYZ2sRGB x, y, z, r, g, b, inGamut
 
 End Sub
 Public Sub sRGB2LAB(ByVal r As Double, ByVal g As Double, ByVal b As Double, ByRef LabL As Double, ByRef LabA As Double, ByRef LabB As Double)
@@ -498,11 +498,12 @@ Dim Brk5 As Double
     Dim h_1merk As Double
     Dim h_2merk As Double
     
-    If a_1merk <> 0 And b_1 <> 0 Then h_1merk = r2d(WorksheetFunction.Atan2(a_1merk, b_1)) _
-                                 Else h_1merk = 0
+    If a_1merk <> 0 Or b_1 <> 0 Then h_1merk = r2d(WorksheetFunction.Atan2(a_1merk, b_1)) _
+                                Else h_1merk = 0
     If h_1merk < 0 Then h_1merk = h_1merk + 360
-    If a_2merk <> 0 And b_2 <> 0 Then h_2merk = r2d(WorksheetFunction.Atan2(a_2merk, b_2)) _
-                                 Else h_2merk = 0
+    
+    If a_2merk <> 0 Or b_2 <> 0 Then h_2merk = r2d(WorksheetFunction.Atan2(a_2merk, b_2)) _
+                                Else h_2merk = 0
     If h_2merk < 0 Then h_2merk = h_2merk + 360
     
     Dim Hsnittmerk As Double
@@ -510,8 +511,8 @@ Dim Brk5 As Double
         Then Hsnittmerk = (h_1merk + h_2merk + 360) / 2 _
         Else Hsnittmerk = (h_1merk + h_2merk) / 2
         
-    Dim T As Double
-    T = 1 - 0.17 * Cos(d2r(Hsnittmerk - 30)) + 0.24 * Cos(d2r(2 * Hsnittmerk)) + 0.32 * Cos(d2r(3 * Hsnittmerk + 6)) - 0.2 * Cos(d2r(4 * Hsnittmerk - 63))
+    Dim t As Double
+    t = 1 - 0.17 * Cos(d2r(Hsnittmerk - 30)) + 0.24 * Cos(d2r(2 * Hsnittmerk)) + 0.32 * Cos(d2r(3 * Hsnittmerk + 6)) - 0.2 * Cos(d2r(4 * Hsnittmerk - 63))
     
     Dim dhmerk As Double
     If Abs(h_2merk - h_1merk) <= 180 Then
@@ -538,7 +539,7 @@ Dim Brk5 As Double
     S_C = 1 + 0.045 * Csnittmerk
     
     Dim S_H As Double
-    S_H = 1 + 0.015 * Csnittmerk * T
+    S_H = 1 + 0.015 * Csnittmerk * t
     
     
     Dim dRho As Double
@@ -566,6 +567,15 @@ Dim Brk5 As Double
     Brk4 = dCmerk / (K_C * S_C)
     Brk5 = dUcHmerk / (K_H * S_H)
     DE00 = Sqr(Brk1 ^ 2 + Brk2 ^ 2 + Brk3 ^ 2 + R_T * Brk4 * Brk5)
+End Function
+
+Function DE(L_1 As Double, a_1 As Double, b_1 As Double, L_2 As Double, a_2 As Double, b_2 As Double) As Double
+Dim delta(0 To 2)
+    delta(0) = Abs(L_1 - L_2)
+    delta(1) = Abs(a_1 - a_2)
+    delta(2) = Abs(b_1 - b_2)
+
+    DE = Sqr(delta(0) ^ 2 + delta(1) ^ 2 + delta(2) ^ 2)
 End Function
 
 Function d2r(d As Double) As Double

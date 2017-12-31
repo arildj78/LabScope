@@ -135,11 +135,12 @@ Private TgtAmax As Double
 Private TgtBmin As Double
 Private TgtBmax As Double
 
+Private DeltaE00(0 To 100, -128 To 127, -128 To 127) As Single
+
 
 Private bi As BITMAPINFO
 
-Dim b2a1 As lutBToAType
-Dim gamt As lutBToAType
+
 
 
 
@@ -401,7 +402,9 @@ Public Sub InitiateProperties(ByRef Parent As Object, _
                               Optional TgtLabB As Double = 0#, _
                               Optional LabExaggeration As Double = 5#, _
                               Optional ScrollBeyondLimit As Boolean = True, _
-                              Optional ColorSpace As tColorSpace = tColorSpace.AdobeRGB)
+                              Optional ColorSpace As tColorSpace = tColorSpace.AdobeRGB, _
+                              Optional MaskDeltaE As Single = 5#, _
+                              Optional OutOfGamutWarning As Boolean = False)
 Dim bufferSize As Long
 Dim result As Long
     hHeap = HeapCreate(0, 0, 0)  ' Create a heap memory object to be used for allocating memory to usercontrol images (Max size 2^23 = 8Mb)
@@ -463,9 +466,13 @@ Dim result As Long
 
     
     'ColorManagement
-    'Load ICC data
-    Get_B2A1_gamt "C:\Windows\System32\spool\drivers\color\AdobeRGB1998.icc", b2a1, gamt
-
+    Dim gamutfile As Long
+    gamutfile = FreeFile
+    'Open "C:\Windows\System32\spool\drivers\color\HP DesignJet Z6200ps 42in Photo_PolyPropylene Banner 200 - HP Matte Polypropylene.icc" For Binary Access Read As gamutfile
+    Open "C:\Windows\System32\spool\drivers\color\z6200 PolyPropylene 200 M1 for D50 i1Pro2.gmt" For Binary Access Read As gamutfile
+    Get gamutfile, , DeltaE00
+    Close gamutfile
+    
     
     
     'Create the background for the control
@@ -629,6 +636,9 @@ Dim i As Integer
     'Draw the gradient background
     Dim BytesPrScanline As Long
     Dim RGBtuple(0 To 3) As Byte
+    Dim ColorManagedColor As dRGBCOLOR
+    Dim CMMoutOfGamut As Boolean
+    
     bi.bmiHeader.biSize = Len(bi.bmiHeader)
 
     
@@ -652,7 +662,7 @@ Dim i As Integer
     Dim sR As Double
     Dim sG As Double
     Dim sB As Double
-    Dim InGamut As Boolean
+    Dim ColorSpaceOutOfGamut As Boolean
     
     tgtLabARange = TgtAmax - TgtAmin
     tgtLabBRange = TgtBmax - TgtBmin
@@ -668,21 +678,44 @@ Dim i As Integer
            
             LAB2sRGB pTgtLabL, LabA, LabB, sR, sG, sB
             Select Case pColorSpace
-                Case tColorSpace.AdobeRGB:  InGamut = InGamut_aRGB(TgtLabL, LabANoExAgg, LabBNoExAgg)
-                Case tColorSpace.sRGB:      InGamut = InGamut_sRGB(TgtLabL, LabANoExAgg, LabBNoExAgg)
-                Case Else:                  InGamut = True
+                Case tColorSpace.AdobeRGB:  ColorSpaceOutOfGamut = Not InGamut_aRGB(TgtLabL, LabANoExAgg, LabBNoExAgg)
+                Case tColorSpace.sRGB:      ColorSpaceOutOfGamut = Not InGamut_sRGB(TgtLabL, LabANoExAgg, LabBNoExAgg)
+                Case Else:                  ColorSpaceOutOfGamut = False
             End Select
             
             
-            If InGamut Then
+            
+            'ColorManagedColor = TransformLab2Tag(b2a1, TgtLabL, LabANoExAgg, LabBNoExAgg)
+            'CMMoutOfGamut = InGamutLab2Tag(gamt, TgtLabL, LabANoExAgg, LabBNoExAgg)
+            
+            CMMoutOfGamut = DeltaE00(Int(Max(Min(TgtLabL, 100), 0)), Int(Max(Min(LabANoExAgg, 127), -128)), Int(Max(Min(LabBNoExAgg, 127), -128))) > pMaskDeltaE
+            Dim diff As Single
+            
+            If pOutOfGamutWarning Then
+                'Set out of gamut colors to grey
+                If CMMoutOfGamut Then
+                    RGBtuple(0) = 100 'Blue
+                    RGBtuple(1) = 100 'Green
+                    RGBtuple(2) = 100 'Red
+                    RGBtuple(3) = &H0  '***Reserved***
+                Else
+                    If ColorSpaceOutOfGamut Then
+                        RGBtuple(0) = 150 'Blue
+                        RGBtuple(1) = 150 'Green
+                        RGBtuple(2) = 150 'Red
+                        RGBtuple(3) = &H0  '***Reserved***
+                    Else
+                        RGBtuple(0) = sB 'Blue
+                        RGBtuple(1) = sG 'Green
+                        RGBtuple(2) = sR 'Red
+                        RGBtuple(3) = &H0  '***Reserved***
+                    End If
+                End If
+            Else
+                'No indication of out of gamut colors
                 RGBtuple(0) = sB 'Blue
                 RGBtuple(1) = sG 'Green
                 RGBtuple(2) = sR 'Red
-                RGBtuple(3) = &H0  '***Reserved***
-            Else
-                RGBtuple(0) = 150 'Blue
-                RGBtuple(1) = 150 'Green
-                RGBtuple(2) = 150 'Red
                 RGBtuple(3) = &H0  '***Reserved***
             End If
             Mem_Copy ByVal backgroundGradient + BytesPrScanline * r + c * 4, RGBtuple(0), 4

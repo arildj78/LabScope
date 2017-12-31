@@ -148,9 +148,14 @@ Public Type LabCOLOR
   a As Long
   b As Long
 End Type
+Public Type dLabCOLOR
+  L As Double
+  a As Double
+  b As Double
+End Type
 
 Public Enum tColorSpace
-    Lab = 1
+    LAB = 1
     ProPhoto = 2
     AdobeRGB = 3
     sRGB = 4
@@ -182,7 +187,7 @@ End Type
 
 
 
-Public Type ColorPROFILE
+Public Type ColorProfile
     dwType As Long
     pProfileData As String
     cbDataSize As Long
@@ -250,6 +255,17 @@ Public Type RGBCOLOR
     red As Integer
     green As Integer
     blue As Integer
+    inGamut As Boolean
+End Type
+Public Type dRGBCOLOR
+    red As Double
+    green As Double
+    blue As Double
+End Type
+Public Type dTriChannel
+    ch0 As Double
+    ch1 As Double
+    ch2 As Double
 End Type
 
 Public Enum COLORTYPE
@@ -341,10 +357,12 @@ End Type
 
 
 Public Type tIccTagEntry
+    'tag As String
     signature As Long
     StringSig As String
     offset As Long
     size As Long
+    datatype As String
 End Type
 Public Type tIccTagTable
     count As Long
@@ -372,43 +390,65 @@ Public Type CurveType
     size As Long
 End Type
 
-'Public Type lut16Type
-'    signature As Long
-'    i As Byte
-'    o As Byte
-'    g As Byte
-'    e(1 To 9) As Long
-''    n As Long
-'    m As Long
-'    inTables() As Long
-'    CLUT() As Long
-'    outTables() As Long
-'End Type
-
-Public Type lutBToAType
+Public Type lut16Type
     signature As Long
     i As Byte
     o As Byte
     g As Byte
+    e(1 To 9) As Long
     n As Long
     m As Long
-    offsetBcurve As Long
-    offsetMatrix As Long
-    offsetMcurve As Long
-    offsetCLUT As Long
-    offsetAcurve As Long
-    Bcurve() As CurveType
-    Matrix(1 To 12) As Long
-    Mcurve() As CurveType
+    inTables() As Long
     CLUT() As Long
-    CLUTgridPoints(0 To 15) As Byte
-    CLUTchannels As Byte
-    CLUTbitCount As Byte
-    Acurve() As CurveType
+    outTables() As Long
     
     'implementation specicfic
     legacyPCS As Boolean
 End Type
+
+Public Type lutBToAType '133 byte
+    Acurve() As CurveType             ' 8 byte
+    Bcurve() As CurveType             ' 8 byte
+    Mcurve() As CurveType             ' 8 byte
+    CLUT() As Long                    ' 8 byte
+    Matrix(1 To 12) As Long           '48 byte
+    signature As Long                 ' 4 byte
+    offsetBcurve As Long              ' 4 byte
+    offsetMatrix As Long              ' 4 byte
+    offsetMcurve As Long              ' 4 byte
+    offsetCLUT As Long                ' 4 byte
+    offsetAcurve As Long              ' 4 byte
+    n As Long                         ' 4 byte
+    m As Long                         ' 4 byte
+    CLUTgridPoints(0 To 15) As Byte   '16 byte
+    i As Byte                         ' 1 byte
+    o As Byte                         ' 1 byte
+    g As Byte                         ' 1 byte
+    CLUTchannels As Byte              ' 1 byte
+    CLUTbitCount As Byte              ' 1 byte
+End Type
+Public Type lutAToBType '133 byte
+    Acurve() As CurveType             ' 8 byte
+    Bcurve() As CurveType             ' 8 byte
+    Mcurve() As CurveType             ' 8 byte
+    CLUT() As Long                    ' 8 byte
+    Matrix(1 To 12) As Long           '48 byte
+    signature As Long                 ' 4 byte
+    offsetBcurve As Long              ' 4 byte
+    offsetMatrix As Long              ' 4 byte
+    offsetMcurve As Long              ' 4 byte
+    offsetCLUT As Long                ' 4 byte
+    offsetAcurve As Long              ' 4 byte
+    n As Long                         ' 4 byte
+    m As Long                         ' 4 byte
+    CLUTgridPoints(0 To 15) As Byte   '16 byte
+    i As Byte                         ' 1 byte
+    o As Byte                         ' 1 byte
+    g As Byte                         ' 1 byte
+    CLUTchannels As Byte              ' 1 byte
+    CLUTbitCount As Byte              ' 1 byte
+End Type
+
 
 'Implementation specific
 Public Enum FunctionType
@@ -421,6 +461,15 @@ Public Enum FunctionType
     PARAMgabcdef = 4
 End Enum
 
+Public Enum RenderingIntent
+    perceptual = 0
+    relative = 1
+    saturation = 2
+    absolute = 3
+End Enum
     
-
+Public Enum TranslateDirection
+    a2b = 0
+    b2a = 1
+End Enum
 
