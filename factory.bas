@@ -15,7 +15,10 @@ Public Function Create_LabScope(ByRef Parent As Object, _
                                 Optional TgtLabA As Double = 0#, _
                                 Optional TgtLabB As Double = 0#, _
                                 Optional LabExaggeration As Double = 5#, _
-                                Optional ScrollBeyondLimit As Boolean = True) As cLabScope
+                                Optional ScrollBeyondLimit As Boolean = True, _
+                                Optional ColorSpace As tColorSpace = tColorSpace.AdobeRGB, _
+                                Optional MaskDeltaE As Single = 5#, _
+                                Optional OutOfGamutWarning As Boolean = False) As cLabScope
                                 
     
     Set Create_LabScope = New cLabScope
@@ -34,7 +37,10 @@ Public Function Create_LabScope(ByRef Parent As Object, _
                                        TgtLabA:=TgtLabA, _
                                        TgtLabB:=TgtLabB, _
                                        LabExaggeration:=LabExaggeration, _
-                                       ScrollBeyondLimit:=ScrollBeyondLimit
+                                       ScrollBeyondLimit:=ScrollBeyondLimit, _
+                                       ColorSpace:=ColorSpace, _
+                                       MaskDeltaE:=MaskDeltaE, _
+                                       OutOfGamutWarning:=OutOfGamutWarning
                                     
 End Function
 

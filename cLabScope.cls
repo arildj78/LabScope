@@ -90,6 +90,8 @@ Private pTgtLabB As Double
 Private pLabExaggeration As Double
 Private pScrollBeyondLimit As Boolean
 Private pColorSpace As tColorSpace
+Private pMaskDeltaE As Single
+Private pOutOfGamutWarning As Boolean
 ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
 Private hDcDisplaySurface As LongPtr
@@ -356,6 +358,32 @@ Public Property Let ColorSpace(value As tColorSpace)
 End Property
 
 
+''''''''''''''''''''''
+' MaskDeltaE property
+''''''''''''''''''''''
+Public Property Get MaskDeltaE() As Single
+    MaskDeltaE = pMaskDeltaE
+End Property
+Public Property Let MaskDeltaE(value As Single)
+    pMaskDeltaE = value
+    Draw_Background
+    RedrawControl
+End Property
+
+
+
+''''''''''''''''''''''
+' OutOfGamutWarning property
+''''''''''''''''''''''
+Public Property Get OutOfGamutWarning() As Boolean
+    OutOfGamutWarning = pOutOfGamutWarning
+End Property
+Public Property Let OutOfGamutWarning(value As Boolean)
+    pOutOfGamutWarning = value
+    Draw_Background
+    RedrawControl
+End Property
+
 
 Public Sub InitiateProperties(ByRef Parent As Object, _
                               ByRef DisplaySurface As MSForms.Image, _
@@ -398,6 +426,8 @@ Dim result As Long
     pLabExaggeration = LabExaggeration
     pScrollBeyondLimit = ScrollBeyondLimit
     pColorSpace = ColorSpace
+    pMaskDeltaE = MaskDeltaE
+    pOutOfGamutWarning = OutOfGamutWarning
 
     'Convert system colors to RGB values
     If (pBackColor And &H80000000) = &H80000000 Then pBackColor = GetSysColor(pBackColor And &HFFFFFFF)      'Convert system color to RGB
