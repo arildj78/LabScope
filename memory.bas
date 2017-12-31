@@ -118,3 +118,7 @@ Dim i As Long
     t2 = GetTickCount
     MsgBox "Operation took " & t2 - t1 & " ticks"
 End Sub
+
+Function tick() As Long
+    tick = GetTickCount
+End Function
