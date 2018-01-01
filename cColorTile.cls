@@ -25,6 +25,7 @@ Private Declare PtrSafe Function GetStockObject Lib "gdi32" (ByVal fnObject As L
 Private Declare PtrSafe Function CreatePen Lib "gdi32" (ByVal fnPenStyle As Long, ByVal nWidth As Long, ByVal crColor As Long) As LongPtr
 Private Declare PtrSafe Function SetBkMode Lib "gdi32" (ByVal hDC As LongPtr, ByVal iBkMode As Long) As Long
 Private Declare PtrSafe Function TextOut Lib "gdi32" Alias "TextOutA" (ByVal hDC As LongPtr, ByVal nXStart As Long, ByVal nYStart As Long, ByVal lpString As String, ByVal cchString As Long) As Boolean
+Private Declare PtrSafe Function SetTextColor Lib "gdi32" (ByVal hDC As LongPtr, ByVal crColor As Long) As Long
 
 'Drawing methods
 Private Declare PtrSafe Function FillRect Lib "user32" (ByVal hDC As LongPtr, ByRef lpRect As Any, ByVal hBrush As LongPtr) As Long
@@ -237,6 +238,12 @@ Public Property Get AverageDeltaE00() As Double
     End If
 End Property
 ''''''''''''''''''''''
+' DeltaE2000 property
+''''''''''''''''''''''
+Public Property Get DeltaE2000() As Double
+    DeltaE2000 = DE00(TgtLabL, TgtLabA, TgtLabB, HitLabL, HitLabA, HitLabB)
+End Property
+''''''''''''''''''''''
 ' Foreground color property
 ''''''''''''''''''''''
 Public Property Get ForeColor() As Double
@@ -265,8 +272,6 @@ Public Sub InitiateProperties(ByRef Parent As Object, _
                               Optional HitLabB As Double = 0#, _
                               Optional Frame As Boolean = False, _
                               Optional FrameThickness As Long = 1, _
-    
-    
                               Optional xOut As Boolean = False, _
                               Optional ForeColor As Long = &H80000012)
     hHeap = HeapCreate(0, 0, 0)  ' Create a heap memory object to be used for allocating memory to usercontrol images
@@ -380,6 +385,8 @@ End Sub
 
 
 Public Sub RedrawControl()
+Dim sDE00 As String
+
     'Select resources
     bmpDrawingOrig = SelectObject(hDcDrawing, bmpDrawing)
     
@@ -418,14 +425,23 @@ Public Sub RedrawControl()
     
     
     'Draw text
+    If pHitLabL >= 45 Then
+        result = SetTextColor(hDcDrawing, pForeColor)
+    Else
+        result = SetTextColor(hDcDrawing, &HFFFFFF)
+    End If
+
     SetBkMode hDcDrawing, BkMode.TRANSPARENT
     result = TextOut(hDcDrawing, 0, 0, "Tgt", 3)
     result = TextOut(hDcDrawing, pxWidth - 25, pxHeight - 20, "Hit", 3)
     
     
     
-    result = BitBlt(hDcDisplaySurface, GlobalRect.topleft.x, GlobalRect.topleft.y, pxWidth, pxHeight, hDcDrawing, 0, 0, SRCCOPY)
-    
+    sDE00 = Format(DeltaE2000, "0.0")
+    result = TextOut(hDcDrawing, 0, pxHeight - 20, sDE00, Len(sDE00))
+
+
+    result = BitBlt(hDcDisplaySurface, GlobalRect.topleft.X, GlobalRect.topleft.Y, pxWidth, pxHeight, hDcDrawing, 0, 0, SRCCOPY)
     'Release resources
     SelectObject hDcDrawing, bmpDrawingOrig
 End Sub
