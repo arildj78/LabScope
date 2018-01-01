@@ -87,7 +87,8 @@ Public Function Create_ColorTile(ByRef Parent As Object, _
                                  Optional HitLabA As Double = 0#, _
                                  Optional HitLabB As Double = 0#, _
                                  Optional Frame As Boolean = False, _
-                                 Optional FrameThickness As Long = 1&) As cColorTile
+                                 Optional FrameThickness As Long = 1&, _
+                                 Optional ForeColor As Long = &H80000012) As cColorTile
     Set Create_ColorTile = New cColorTile
     Create_ColorTile.InitiateProperties Parent:=Parent, _
                                         DisplaySurface:=DisplaySurface, _
@@ -100,5 +101,7 @@ Public Function Create_ColorTile(ByRef Parent As Object, _
                                         HitLabA:=HitLabA, _
                                         HitLabB:=HitLabB, _
                                         Frame:=Frame, _
-                                        FrameThickness:=FrameThickness
+                                        FrameThickness:=FrameThickness, _
+                                        ForeColor:=ForeColor
+                                        
 End Function

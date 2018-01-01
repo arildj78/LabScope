@@ -91,6 +91,9 @@ Private pTgtLabB As Double
 Private pTileGroup As Collection
 Private pFrame As Boolean
 Private pFrameThickness As Long
+Private pForeColor As Long
+
+
 
 ''''''''''''''''''''''
 ' LabScope property
@@ -208,6 +211,20 @@ End Property
 Public Property Let TileGroup(value As Collection)
     Set pTileGroup = value
 End Property
+''''''''''''''''''''''
+' Foreground color property
+''''''''''''''''''''''
+Public Property Get ForeColor() As Double
+    ForeColor = pForeColor
+End Property
+Public Property Let ForeColor(value As Double)
+    pForeColor = value
+    'DeleteObject (ForegroundPen)
+    'ForegroundPen = CreatePen(PS_Solid, pLineWidth, pForeColor)
+    'Draw_Background
+    RedrawControl
+End Property
+
 
 
 
@@ -222,7 +239,8 @@ Public Sub InitiateProperties(ByRef Parent As Object, _
                               Optional HitLabA As Double = 0#, _
                               Optional HitLabB As Double = 0#, _
                               Optional Frame As Boolean = False, _
-                              Optional FrameThickness As Long = 1)
+                              Optional FrameThickness As Long = 1, _
+                              Optional ForeColor As Long = &H80000012)
     
     
     hHeap = HeapCreate(0, 0, 0)  ' Create a heap memory object to be used for allocating memory to usercontrol images
@@ -298,7 +316,7 @@ Private Sub Class_Terminate()
     
 End Sub
 
-Private Sub pDisplaySurface_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal y As Single)
+Private Sub pDisplaySurface_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
     If Button <> 1 Then Exit Sub
     If pTileGroup Is Nothing Then Exit Sub
     
