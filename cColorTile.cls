@@ -95,6 +95,7 @@ Private pTileGroup As Collection
 Private pFrame As Boolean
 Private pFrameThickness As Long
 Private pXout As Boolean
+Private pForeColor As Long
 
 
 ''''''''''''''''''''''
@@ -235,6 +236,20 @@ Public Property Get AverageDeltaE00() As Double
         AverageDeltaE00 = 0
     End If
 End Property
+''''''''''''''''''''''
+' Foreground color property
+''''''''''''''''''''''
+Public Property Get ForeColor() As Double
+    ForeColor = pForeColor
+End Property
+Public Property Let ForeColor(value As Double)
+    pForeColor = value
+    'DeleteObject (ForegroundPen)
+    'ForegroundPen = CreatePen(PS_Solid, pLineWidth, pForeColor)
+    'Draw_Background
+    RedrawControl
+End Property
+
 
 
 
@@ -250,9 +265,10 @@ Public Sub InitiateProperties(ByRef Parent As Object, _
                               Optional HitLabB As Double = 0#, _
                               Optional Frame As Boolean = False, _
                               Optional FrameThickness As Long = 1, _
-                              Optional xOut As Boolean)
     
     
+                              Optional xOut As Boolean = False, _
+                              Optional ForeColor As Long = &H80000012)
     hHeap = HeapCreate(0, 0, 0)  ' Create a heap memory object to be used for allocating memory to usercontrol images
     
     
