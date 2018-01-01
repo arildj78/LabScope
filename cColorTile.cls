@@ -25,6 +25,7 @@ Private Declare PtrSafe Function GetStockObject Lib "gdi32" (ByVal fnObject As L
 Private Declare PtrSafe Function CreatePen Lib "gdi32" (ByVal fnPenStyle As Long, ByVal nWidth As Long, ByVal crColor As Long) As LongPtr
 Private Declare PtrSafe Function SetBkMode Lib "gdi32" (ByVal hDC As LongPtr, ByVal iBkMode As Long) As Long
 Private Declare PtrSafe Function TextOut Lib "gdi32" Alias "TextOutA" (ByVal hDC As LongPtr, ByVal nXStart As Long, ByVal nYStart As Long, ByVal lpString As String, ByVal cchString As Long) As Boolean
+Private Declare PtrSafe Function SetTextColor Lib "gdi32" (ByVal hDC As LongPtr, ByVal crColor As Long) As Long
 
 'Drawing methods
 Private Declare PtrSafe Function FillRect Lib "user32" (ByVal hDC As LongPtr, ByRef lpRect As Any, ByVal hBrush As LongPtr) As Long
@@ -212,6 +213,12 @@ Public Property Let TileGroup(value As Collection)
     Set pTileGroup = value
 End Property
 ''''''''''''''''''''''
+' DeltaE2000 property
+''''''''''''''''''''''
+Public Property Get DeltaE2000() As Double
+    DeltaE2000 = DE00(TgtLabL, TgtLabA, TgtLabB, HitLabL, HitLabA, HitLabB)
+End Property
+''''''''''''''''''''''
 ' Foreground color property
 ''''''''''''''''''''''
 Public Property Get ForeColor() As Double
@@ -345,7 +352,9 @@ End Sub
 
 
 
-Public Sub RedrawControl()
+Private Sub RedrawControl()
+Dim sDE00 As String
+    
     'Select resources
     bmpDrawingOrig = SelectObject(hDcDrawing, bmpDrawing)
     
@@ -377,13 +386,22 @@ Public Sub RedrawControl()
     
     
     'Draw text
+    If pHitLabL >= 45 Then
+        result = SetTextColor(hDcDrawing, pForeColor)
+    Else
+        result = SetTextColor(hDcDrawing, &HFFFFFF)
+    End If
+    
     SetBkMode hDcDrawing, BkMode.TRANSPARENT
     result = TextOut(hDcDrawing, 0, 0, "Tgt", 3)
     result = TextOut(hDcDrawing, pxWidth - 25, pxHeight - 20, "Hit", 3)
     
+    sDE00 = Format(DeltaE2000, "0.0")
+    result = TextOut(hDcDrawing, 0, pxHeight - 20, sDE00, Len(sDE00))
     
     
-    result = BitBlt(hDcDisplaySurface, GlobalRect.topleft.x, GlobalRect.topleft.y, pxWidth, pxHeight, hDcDrawing, 0, 0, SRCCOPY)
+    
+    result = BitBlt(hDcDisplaySurface, GlobalRect.topleft.X, GlobalRect.topleft.Y, pxWidth, pxHeight, hDcDrawing, 0, 0, SRCCOPY)
     
     'Release resources
     SelectObject hDcDrawing, bmpDrawingOrig
@@ -397,25 +415,25 @@ Dim yPixPrPt As Double
     'Set Scope rectangle for use when invalidating paint area
     xPixPrPt = GetDeviceCaps(hDcDrawing, LOGPIXELSX) / 72
     yPixPrPt = GetDeviceCaps(hDcDrawing, LOGPIXELSY) / 72
-    GlobalRect.topleft.x = pDisplaySurface.Left * xPixPrPt
-    GlobalRect.topleft.y = pDisplaySurface.Top * yPixPrPt
-    GlobalRect.btmRight.x = (pDisplaySurface.Left + pDisplaySurface.Width) * xPixPrPt
-    GlobalRect.btmRight.y = (pDisplaySurface.Top + pDisplaySurface.Height) * yPixPrPt
+    GlobalRect.topleft.X = pDisplaySurface.Left * xPixPrPt
+    GlobalRect.topleft.Y = pDisplaySurface.Top * yPixPrPt
+    GlobalRect.btmRight.X = (pDisplaySurface.Left + pDisplaySurface.Width) * xPixPrPt
+    GlobalRect.btmRight.Y = (pDisplaySurface.Top + pDisplaySurface.Height) * yPixPrPt
     
     pxWidth = pDisplaySurface.Width * xPixPrPt
     pxHeight = pDisplaySurface.Height * yPixPrPt
   
-    LocalRect.topleft.x = 0
-    LocalRect.topleft.y = 0
-    LocalRect.btmRight.x = pxWidth
-    LocalRect.btmRight.y = pxHeight
+    LocalRect.topleft.X = 0
+    LocalRect.topleft.Y = 0
+    LocalRect.btmRight.X = pxWidth
+    LocalRect.btmRight.Y = pxHeight
     
-    Triangle(0).x = 0
-    Triangle(0).y = pxHeight
-    Triangle(1).x = pxWidth
-    Triangle(1).y = 0
-    Triangle(2).x = pxWidth
-    Triangle(2).y = pxHeight
+    Triangle(0).X = 0
+    Triangle(0).Y = pxHeight
+    Triangle(1).X = pxWidth
+    Triangle(1).Y = 0
+    Triangle(2).X = pxWidth
+    Triangle(2).Y = pxHeight
     
 End Sub
 
@@ -515,3 +533,4 @@ Public Function AddToGroup(ColorTile As cColorTile)
     
     ColorTile.TileGroup = pTileGroup
 End Function
+
