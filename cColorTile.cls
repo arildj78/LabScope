@@ -96,6 +96,7 @@ Private pFrame As Boolean
 Private pFrameThickness As Long
 Private pXout As Boolean
 
+
 ''''''''''''''''''''''
 ' LabScope property
 ''''''''''''''''''''''
@@ -221,6 +222,18 @@ End Property
 Public Property Let xOut(value As Boolean)
     pXout = value
     RedrawControl
+End Property
+''''''''''''''''''''''
+' AverageDeltaE00 property
+''''''''''''''''''''''
+Public Property Get AverageDeltaE00() As Double
+    If pTileGroup Is Nothing Then
+        'Tile is not assigned to any group.
+        AverageDeltaE00 = 0
+    Else
+        'Tile is assigned to a group. Calculate average of group.
+        AverageDeltaE00 = 0
+    End If
 End Property
 
 
