@@ -450,7 +450,7 @@ Dim sDE00 As String
     
     
     sDE00 = Format(DeltaE2000, "0.0")
-    result = TextOut(hDcDrawing, 0, pxHeight - 20, sDE00, Len(sDE00))
+    result = TextOut(hDcDrawing, 3, pxHeight - 21, sDE00, Len(sDE00))
 
 
     result = BitBlt(hDcDisplaySurface, GlobalRect.topleft.x, GlobalRect.topleft.y, pxWidth, pxHeight, hDcDrawing, 0, 0, SRCCOPY)
