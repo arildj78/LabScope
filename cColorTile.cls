@@ -229,12 +229,24 @@ End Property
 ' AverageDeltaE00 property
 ''''''''''''''''''''''
 Public Property Get AverageDeltaE00() As Double
+Dim tile As cColorTile
+Dim tileCount As Integer
+Dim DEsum As Double
+
     If pTileGroup Is Nothing Then
         'Tile is not assigned to any group.
         AverageDeltaE00 = 0
     Else
         'Tile is assigned to a group. Calculate average of group.
-        AverageDeltaE00 = 0
+        For Each tile In Me.TileGroup
+            If Not tile.xOut Then
+                tileCount = tileCount + 1
+                DEsum = DEsum + tile.DeltaE2000
+            End If
+        Next tile
+        
+        If tileCount = 0 Then AverageDeltaE00 = 0 _
+                         Else AverageDeltaE00 = DEsum / tileCount
     End If
 End Property
 ''''''''''''''''''''''
@@ -441,7 +453,7 @@ Dim sDE00 As String
     result = TextOut(hDcDrawing, 0, pxHeight - 20, sDE00, Len(sDE00))
 
 
-    result = BitBlt(hDcDisplaySurface, GlobalRect.topleft.X, GlobalRect.topleft.Y, pxWidth, pxHeight, hDcDrawing, 0, 0, SRCCOPY)
+    result = BitBlt(hDcDisplaySurface, GlobalRect.topleft.x, GlobalRect.topleft.y, pxWidth, pxHeight, hDcDrawing, 0, 0, SRCCOPY)
     'Release resources
     SelectObject hDcDrawing, bmpDrawingOrig
 End Sub
