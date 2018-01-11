@@ -392,6 +392,13 @@ Public Property Let OutOfGamutWarning(value As Boolean)
     RedrawControl
 End Property
 
+''''''''''''''''''''''
+' DeltaE2000 property
+''''''''''''''''''''''
+Public Property Get DeltaE2000() As Double
+    DeltaE2000 = DE00(TgtLabL, TgtLabA, TgtLabB, HitLabL, HitLabA, HitLabB)
+End Property
+
 
 Public Sub InitiateProperties(ByRef Parent As Object, _
                               ByRef DisplaySurface As MSForms.Image, _
@@ -544,20 +551,21 @@ Public Sub RedrawControl()
     
     
     'Draw text
-    Dim TabStops(1 To 2) As Long
+    Dim TabStops(1 To 3) As Long
     TabStops(1) = 160
-    TabStops(2) = pxSize / 2
+    TabStops(2) = pxSize - 95
+    TabStops(3) = pxSize - 45
     Dim s As String
     Dim sW As String
     
     SetBkMode hDcDrawing, BkMode.TRANSPARENT
     s = "Hit a*" & vbTab & Format(pHitLabA, "0.00")
     sW = StrConv(s, vbUnicode)
-    result = TabbedTextOut(hDcDrawing, 0, pxSize - 40, sW, Len(s), 2, TabStops(1), 0)
+    result = TabbedTextOut(hDcDrawing, 0, pxSize - 40, sW, Len(s), 4, TabStops(1), 0)
     
     s = "Hit b*" & vbTab & Format(pHitLabB, "0.00")
     sW = StrConv(s, vbUnicode)
-    result = TabbedTextOut(hDcDrawing, 0, pxSize - 20, sW, Len(s), 2, TabStops(1), 0)
+    result = TabbedTextOut(hDcDrawing, 0, pxSize - 20, sW, Len(s), 4, TabStops(1), 0)
     
     
     result = BitBlt(hDcDisplaySurface, GlobalRect.topleft.x, GlobalRect.topleft.y, pxWidth, pxHeight, hDcDrawing, 0, 0, SRCCOPY)
@@ -806,28 +814,28 @@ Dim i As Integer
     
     
     'Draw text
-    Dim TabStops(1 To 2) As Long
+    Dim TabStops(1 To 3) As Long
     TabStops(1) = 160
-    TabStops(2) = pxSize / 2
+    TabStops(2) = pxSize - 95
+    TabStops(3) = pxSize - 45
     Dim s As String
     Dim sW As String
     
-    s = ChrW(&H394) & "E* pr division" & vbTab & Format(UnitsPrDivision, "0.00")
+    s = ChrW(&H394) & "E* pr division" & vbTab & Format(UnitsPrDivision, "0.00") & vbTab & ChrW(&H394) & "E00" & vbTab & Format(DeltaE2000, "0.00")
     sW = StrConv(s, vbUnicode)
-    result = TabbedTextOut(hDcBackground, 0, 0, sW, Len(s), 2, TabStops(1), 0)
+    result = TabbedTextOut(hDcBackground, 0, 0, sW, Len(s), 4, TabStops(1), 0)
     
     s = "Color Exaggeration" & vbTab & Format(pLabExaggeration, "0.00")
     sW = StrConv(s, vbUnicode)
-    result = TabbedTextOut(hDcBackground, 0, 20, sW, Len(s), 2, TabStops(1), 0)
+    result = TabbedTextOut(hDcBackground, 0, 20, sW, Len(s), 4, TabStops(1), 0)
     
     s = "Target a*" & vbTab & Format(pTgtLabA, "0.00")
     sW = StrConv(s, vbUnicode)
-    result = TabbedTextOut(hDcBackground, 0, 40, sW, Len(s), 2, TabStops(1), 0)
+    result = TabbedTextOut(hDcBackground, 0, 40, sW, Len(s), 4, TabStops(1), 0)
     
     s = "Target b*" & vbTab & Format(pTgtLabB, "0.00")
     sW = StrConv(s, vbUnicode)
-    result = TabbedTextOut(hDcBackground, 0, 60, sW, Len(s), 2, TabStops(1), 0)
-    
+    result = TabbedTextOut(hDcBackground, 0, 60, sW, Len(s), 4, TabStops(1), 0)
     
     
     
