@@ -2,6 +2,7 @@ Attribute VB_Name = "factory"
 
 Public Function Create_LabScope(ByRef Parent As Object, _
                                 ByRef DisplaySurface As MSForms.Image, _
+                                Optional HitLabL As Double = 0#, _
                                 Optional HitLabA As Double = 0#, _
                                 Optional HitLabB As Double = 0#, _
                                 Optional BackColor As Long = &H8000000F, _
@@ -24,6 +25,7 @@ Public Function Create_LabScope(ByRef Parent As Object, _
     Set Create_LabScope = New cLabScope
     Create_LabScope.InitiateProperties Parent:=Parent, _
                                        DisplaySurface:=DisplaySurface, _
+                                       HitLabL:=HitLabL, _
                                        HitLabA:=HitLabA, _
                                        HitLabB:=HitLabB, _
                                        BackColor:=BackColor, _

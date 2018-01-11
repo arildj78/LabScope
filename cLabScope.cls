@@ -82,6 +82,7 @@ Private pLineWidth As Long
 Private pReticleSize As Double
 Private pReticleColor As Long
 Private pUnitsPrDivision As Double
+Private pHitLabL As Double
 Private pHitLabA As Double
 Private pHitLabB As Double
 Private pTgtLabL As Double
@@ -142,8 +143,16 @@ Private bi As BITMAPINFO
 
 
 
-
-
+''''''''''''''''''''''
+' HitLabL property
+''''''''''''''''''''''
+Public Property Get HitLabL() As Double
+    HitLabL = pHitLabL
+End Property
+Public Property Let HitLabL(value As Double)
+    pHitLabL = value
+    RedrawControl
+End Property
 
 
 ''''''''''''''''''''''
@@ -371,8 +380,6 @@ Public Property Let MaskDeltaE(value As Single)
     RedrawControl
 End Property
 
-
-
 ''''''''''''''''''''''
 ' OutOfGamutWarning property
 ''''''''''''''''''''''
@@ -388,6 +395,7 @@ End Property
 
 Public Sub InitiateProperties(ByRef Parent As Object, _
                               ByRef DisplaySurface As MSForms.Image, _
+                              Optional HitLabL As Double = 0#, _
                               Optional HitLabA As Double = 0#, _
                               Optional HitLabB As Double = 0#, _
                               Optional BackColor As Long = &H8000000F, _
@@ -414,6 +422,7 @@ Dim result As Long
     Set pDisplaySurface = DisplaySurface
     
     'Set properties
+    pHitLabL = HitLabL
     pHitLabA = HitLabA
     pHitLabB = HitLabB
     pBackColor = BackColor
@@ -594,10 +603,11 @@ Dim yPixPrPt As Double
                     
 End Sub
 
-Sub SetColors(TgtLabL As Double, TgtLabA As Double, TgtLabB As Double, HitLabA As Double, HitLabB As Double)
+Sub SetColors(TgtLabL As Double, TgtLabA As Double, TgtLabB As Double, HitLabL As Double, HitLabA As Double, HitLabB As Double)
     pTgtLabL = TgtLabL
     pTgtLabA = TgtLabA
     pTgtLabB = TgtLabB
+    pHitLabL = HitLabL
     pHitLabA = HitLabA
     pHitLabB = HitLabB
     

@@ -382,7 +382,7 @@ Private Sub pDisplaySurface_MouseDown(ByVal Button As Integer, ByVal Shift As In
         For i = 1 To pTileGroup.count
             Set tile = pTileGroup(i)
             If tile Is Me Then
-                LabScope.SetColors pTgtLabL, pTgtLabA, pTgtLabB, pHitLabA, pHitLabB
+                LabScope.SetColors pTgtLabL, pTgtLabA, pTgtLabB, pHitLabL, pHitLabA, pHitLabB
                 LScope.SetColors pTgtLabL, pTgtLabA, pTgtLabB, pHitLabL
             Else
                 tile.Frame = False
